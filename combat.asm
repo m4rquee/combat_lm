@@ -26,9 +26,12 @@ WinMain proc hInst:HINSTANCE, hPrevInst:HINSTANCE, CmdLine:LPSTR, CmdShow:DWORD
     LOCAL msg:MSG 
     LOCAL hwnd:HWND
 
+    LOCAL Wwd  :DWORD
+    LOCAL Wht  :DWORD
+
 	;Fill values in members of wc
     mov wc.cbSize, SIZEOF WNDCLASSEX  
-    mov wc.style, CS_HREDRAW or CS_VREDRAW 
+    mov wc.style, CS_BYTEALIGNWINDOW or CS_BYTEALIGNCLIENT
     mov wc.lpfnWndProc, OFFSET WndProc 
     mov wc.cbClsExtra, NULL 
     mov wc.cbWndExtra, NULL 
@@ -49,14 +52,15 @@ WinMain proc hInst:HINSTANCE, hPrevInst:HINSTANCE, CmdLine:LPSTR, CmdShow:DWORD
 
     invoke RegisterClassEx, addr wc ;Register our window class 
 
+    mov Wwd, 500
+    mov Wht, 500
+
     invoke CreateWindowEx, NULL,\ 
                 ADDR ClassName,\ 
                 ADDR AppName,\ 
-                WS_OVERLAPPEDWINDOW,\ 
-                CW_USEDEFAULT,\ 
-                CW_USEDEFAULT,\ 
-                CW_USEDEFAULT,\ 
-                CW_USEDEFAULT,\ 
+                WS_OVERLAPPED or WS_SYSMENU or WS_MINIMIZEBOX,\ 
+                CW_USEDEFAULT, CW_USEDEFAULT,\
+                Wwd, Wht,\ 
                 NULL,\ 
                 NULL,\ 
                 hInst,\ 

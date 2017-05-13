@@ -43,4 +43,4 @@ hInstance HINSTANCE ?
 ; Local prototypes
 ;=================
 
-WinMain proto :DWORD, :DWORD, :DWORD, :DWORD      
+WinMain proto :DWORD, :DWORD, :DWORD, :DWORD    
