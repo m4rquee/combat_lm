@@ -14,3 +14,33 @@ includelib C:\masm32\lib\kernel32.lib
 includelib C:\masm32\lib\Comctl32.lib
 includelib C:\masm32\lib\comdlg32.lib
 includelib C:\masm32\lib\shell32.lib
+
+;=================
+; Local structs
+;=================
+pair struct
+    x  DB ?
+    y  DB ?
+pair ends
+
+player struct 
+    pos pair <>
+    direc DB ?
+    life DB ?
+player ends
+
+;=================
+; Local data
+;=================
+.data                     		
+ClassName db "CombatClass", 0 
+AppName db "Combat", 0 
+
+.data?                
+hInstance HINSTANCE ?  
+
+;=================
+; Local prototypes
+;=================
+
+WinMain proto :DWORD, :DWORD, :DWORD, :DWORD      
