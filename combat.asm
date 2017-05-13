@@ -43,7 +43,7 @@ WinMain proc hInst:HINSTANCE, hPrevInst:HINSTANCE, CmdLine:LPSTR, CmdShow:DWORD
     mov wc.lpszMenuName, NULL 
     mov wc.lpszClassName, OFFSET ClassName 
 
-    invoke LoadIcon, NULL, IDI_APPLICATION 
+    invoke LoadIcon, hInstance, 500 
     mov wc.hIcon, eax 
     mov wc.hIconSm, eax
 
@@ -52,8 +52,8 @@ WinMain proc hInst:HINSTANCE, hPrevInst:HINSTANCE, CmdLine:LPSTR, CmdShow:DWORD
 
     invoke RegisterClassEx, addr wc ;Register our window class 
 
-    mov Wwd, 500
-    mov Wht, 500
+    mov Wwd, 1500
+    mov Wht, 1000
 
     invoke CreateWindowEx, NULL,\ 
                 ADDR ClassName,\ 
