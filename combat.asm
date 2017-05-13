@@ -5,12 +5,14 @@ option casemap :none
 include combat.inc
 
 .data
-    player1 player <<?, ?>, 3, 100>
-    player2 player <<?, ?>, 7, 100>
-
+    player1 player <MAX_LIFE, <?, WIN_HT / 2, 3>>
+    player2 player <MAX_LIFE, <?, WIN_HT / 2, 7>>
+    plyrsMoving pair <0, 0> ;Indica se cada jogador está se movendo
     score pair <0, 0>
 
-.data?
+    ;Lista de tiros de cada jogador:
+    shots1 oriObj TRACKED_SHOTS dup (<?, ?, ?>)  
+    shots2 oriObj TRACKED_SHOTS dup (<?, ?, ?>)
 
 .code 
 start:
@@ -52,8 +54,8 @@ WinMain proc hInst:HINSTANCE, hPrevInst:HINSTANCE, CmdLine:LPSTR, CmdShow:DWORD
 
     invoke RegisterClassEx, addr wc ;Register our window class 
 
-    mov Wwd, 1500
-    mov Wht, 1000
+    mov Wwd, WIN_WD
+    mov Wht, WIN_HT
 
     invoke CreateWindowEx, NULL,\ 
                 ADDR ClassName,\ 
@@ -94,6 +96,18 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
     xor eax, eax 
     ret 
 WndProc endp
+
+movAll proc ;Atualiza as posições dos tiros e jogadores
+    ;Movimenta jogadores:
+    .if (plyrsMoving[0])
+
+    .elseif (plyrsMoving[1])
+
+    .endif
+
+    ;Movimenta os tiros:
+
+movAll endp
 
 end start
 
