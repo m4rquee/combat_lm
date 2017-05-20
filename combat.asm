@@ -5,8 +5,9 @@ option casemap :none
 include combat.inc
 
 .data
-    player1 player <MAX_LIFE, <?, WIN_HT / 2, 3>>
-    player2 player <MAX_LIFE, <?, WIN_HT / 2, 7>>
+    player1 player <MAX_LIFE, <?, WIN_HT / 2, 7>>
+    player2 player <MAX_LIFE, <?, WIN_HT / 2, 3>>
+
     plyrsMoving pair <0, 0> ;Indica se cada jogador está se movendo
     score pair <0, 0>
 
@@ -100,9 +101,35 @@ WndProc endp
 movAll proc ;Atualiza as posições dos tiros e jogadores
     ;Movimenta jogadores:
     .if (plyrsMoving[0])
+        mov al, player1.playerObj.direc
 
-    .elseif (plyrsMoving[1])
+        .if (al == 0 || al == 1 || al == 2) ;Movimento para cima direc = 0, 1 ou 2
+            sub player1.playerObj.y, SPEED
+        .elseif (al == 4 || al == 5 || al == 6) ;Movimento para baixo direc = 4, 5 ou 6
+            add player1.playerObj.y, SPEED
+        .endif
 
+        .if (al == 2 || al == 3 || al == 4) ;Movimento para direita direc = 2, 3 ou 4
+            add player1.playerObj.x, SPEED
+        .elseif (al == 6 || al == 7 || al == 0) ;Movimento para esquerda direc = 6, 7 ou 0
+            sub player1.playerObj.x, SPEED
+        .endif
+    .endif
+
+    .if (plyrsMoving[1])
+        mov al, player2.playerObj.direc
+
+        .if (al == 0 || al == 1 || al == 2) ;Movimento para cima direc = 0, 1 ou 2
+            sub player2.playerObj.y, SPEED
+        .elseif (al == 4 || al == 5 || al == 6) ;Movimento para baixo direc = 4, 5 ou 6
+            add player2.playerObj.y, SPEED
+        .endif
+
+        .if (al == 2 || al == 3 || al == 4) ;Movimento para direita direc = 2, 3 ou 4
+            add player2.playerObj.x, SPEED
+        .elseif (al == 6 || al == 7 || al == 0) ;Movimento para esquerda direc = 6, 7 ou 0
+            sub player2.playerObj.x, SPEED
+        .endif
     .endif
 
     ;Movimenta os tiros:

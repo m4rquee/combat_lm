@@ -47,6 +47,7 @@ player ends
 	WIN_WD equ 1500 ;Largura da janela
 	WIN_HT equ 1000 ;Altura da janela
 
+    SPEED equ 1 ;Velocidade dos jogadores
 	MAX_SCORE equ 5 ;Score máximo para o termino do jogo
     MAX_LIFE equ 100 ;Vida inicial dos jogadores
     TRACKED_SHOTS equ 15 ;Número máximo de tiros na tela, 
