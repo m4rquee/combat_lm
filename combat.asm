@@ -12,8 +12,8 @@ include combat.inc
     score pair <0, 0>
 
     ;Lista de tiros de cada jogador:
-    shots1 oriObj TRACKED_SHOTS dup (<?, ?, ?>)  
-    shots2 oriObj TRACKED_SHOTS dup (<?, ?, ?>)
+    shots1 oriObj TRACKED_SHOTS dup (<?, ?, -1>)  
+    shots2 oriObj TRACKED_SHOTS dup (<?, ?, -1>)
 
 .code 
 start:

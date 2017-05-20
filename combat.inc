@@ -27,7 +27,8 @@ oriObj struct ;Objeto orientado
 	x  dw ?
     y  dw ?
     
-	direc db ? ;Indica a direção que o objeto está apontando (entre 0 e 7):
+	direc db ? ;Indica a direção que o objeto está apontando (entre -1 e 7, 
+               ;sendo que -1 significa que não existe):
 			   ; 0-1-2
 			   ; |   |
     		   ; 7   3
