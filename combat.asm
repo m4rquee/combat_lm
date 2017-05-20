@@ -79,7 +79,7 @@ WinMain proc hInst:HINSTANCE, hPrevInst:HINSTANCE, CmdLine:LPSTR, CmdShow:DWORD
         .break .if (!eax) 
 
         invoke TranslateMessage, addr msg 
-        invoke DispatchMessage, addr msg 
+        invoke DispatchMessage, addr msg
 	.endw 
 
     mov eax, msg.wParam ;Return exit code in eax 
@@ -91,20 +91,47 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM ;wParam - Parame
     locaL hdc:HDC 
     locaL ps:PAINTSTRUCT
 
-    .if uMsg == WM_DESTROY ;If the user closes our window 
-        invoke PostQuitMessage, NULL ;Quit our application 
-    .elseif uMsg == WM_CHAR 
-        
+    ;invoke InvalidateRect, hWnd, NULL, TRUE ;Dispara o evento de paint da tela
 
-        invoke InvalidateRect, hWnd, NULL, TRUE ;Dispara o evento de paint da tela
-    .elseif uMsg == WM_PAINT 
-        invoke BeginPaint, hWnd, addr ps 
+    .if uMsg == WM_DESTROY ;If the user closes the window 
+        invoke PostQuitMessage, NULL ;Quit the application 
+    .elseif uMsg == WM_CHAR ;Keydown printable:
+        ;Teclas de movimento player1:
+        .if (wParam == 77h) ;w
 
-        mov hdc, eax 
-        invoke TextOut, hdc, 0, 0, addr input, 1 
+        .elseif (wParam == 61h) ;a
 
-        invoke EndPaint, hWnd, addr ps 
-    .else 
+        .elseif (wParam == 73h) ;s
+
+        .elseif (wParam == 64h) ;d
+
+        .elseif (wParam == 79h) ;y - Tiro player1:
+
+        .elseif (wParam == 75h) ;u - Especial player1:
+
+        .elseif (wParam == 32h) ;2 - Tiro player2:
+
+        .elseif (wParam == 33h) ;3 - Especial player2:
+        .endif
+
+    .elseif uMsg == WM_DEADCHAR ;Keyup printable:
+
+    .elseif uMsg == WM_KEYDOWN ;Keydown nonprintable:
+        ;Teclas de movimento player2:
+        .if (wParam == VK_UP) ;seta cima
+
+        .elseif (wParam == VK_DOWN) ;seta baixo
+
+        .elseif (wParam == VK_LEFT) ;seta esquerda
+
+        .elseif (wParam == VK_RIGHT) ;seta direita
+
+        .endif
+
+    .elseif uMsg == WM_KEYUP ;Keyup nonprintable:
+
+    .elseif uMsg == WM_PAINT ;Atualizar da página:  
+    .else ;Default:
         invoke DefWindowProc, hWnd, uMsg, wParam, lParam ;Default message processing 
         ret 
     .endif 
