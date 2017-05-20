@@ -25,12 +25,12 @@ invoke WinMain, hInstance, NULL, NULL, SW_SHOWDEFAULT
 invoke ExitProcess, eax
 
 WinMain proc hInst:HINSTANCE, hPrevInst:HINSTANCE, CmdLine:LPSTR, CmdShow:DWORD
-	LOCAL wc:WNDCLASSEX                                            
-    LOCAL msg:MSG 
-    LOCAL hwnd:HWND
+	local wc:WNDCLASSEX                                            
+    local msg:MSG 
+    local hwnd:HWND
 
-    LOCAL Wwd  :DWORD
-    LOCAL Wht  :DWORD
+    local Wwd  :DWORD
+    local Wht  :DWORD
 
 	;Fill values in members of wc
     mov wc.cbSize, SIZEOF WNDCLASSEX  
@@ -59,8 +59,8 @@ WinMain proc hInst:HINSTANCE, hPrevInst:HINSTANCE, CmdLine:LPSTR, CmdShow:DWORD
     mov Wht, WIN_HT
 
     invoke CreateWindowEx, NULL,\ 
-                ADDR ClassName,\ 
-                ADDR AppName,\ 
+                addr ClassName,\ 
+                addr AppName,\ 
                 WS_OVERLAPPED or WS_SYSMENU or WS_MINIMIZEBOX,\ 
                 CW_USEDEFAULT, CW_USEDEFAULT,\
                 Wwd, Wht,\ 
@@ -74,25 +74,40 @@ WinMain proc hInst:HINSTANCE, hPrevInst:HINSTANCE, CmdLine:LPSTR, CmdShow:DWORD
     invoke UpdateWindow, hwnd ;Refresh the client area
 
     ;Enter message loop
-	.WHILE TRUE  
-        invoke GetMessage, ADDR msg, NULL, 0, 0 
-        .BREAK .IF (!eax) 
+	.while TRUE  
+        invoke GetMessage, addr msg, NULL, 0, 0 
+        .break .if (!eax) 
 
-        invoke TranslateMessage, ADDR msg 
-        invoke DispatchMessage, ADDR msg 
-	.ENDW 
+        invoke TranslateMessage, addr msg 
+        invoke DispatchMessage, addr msg 
+	.endw 
 
     mov eax, msg.wParam ;Return exit code in eax 
     ret 
 WinMain endp
 
-WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM 
-    .IF uMsg == WM_DESTROY ;If the user closes our window 
+WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM ;wParam - Parametro recebido 
+                                                                ;do Windows
+    locaL hdc:HDC 
+    locaL ps:PAINTSTRUCT
+
+    .if uMsg == WM_DESTROY ;If the user closes our window 
         invoke PostQuitMessage, NULL ;Quit our application 
-    .ELSE 
+    .elseif uMsg == WM_CHAR 
+        
+
+        invoke InvalidateRect, hWnd, NULL, TRUE ;Dispara o evento de paint da tela
+    .elseif uMsg == WM_PAINT 
+        invoke BeginPaint, hWnd, addr ps 
+
+        mov hdc, eax 
+        invoke TextOut, hdc, 0, 0, addr input, 1 
+
+        invoke EndPaint, hWnd, addr ps 
+    .else 
         invoke DefWindowProc, hWnd, uMsg, wParam, lParam ;Default message processing 
         ret 
-    .ENDIF 
+    .endif 
 
     xor eax, eax 
     ret 
@@ -103,15 +118,15 @@ movAll proc ;Atualiza as posições dos tiros e jogadores
     .if (plyrsMoving[0])
         mov al, player1.playerObj.direc
 
-        .if (al == 0 || al == 1 || al == 2) ;Movimento para cima direc = 0, 1 ou 2
+        .if (al >= 0 && al <= 2) ;Movimento para cima direc = 0, 1 ou 2
             sub player1.playerObj.y, SPEED
-        .elseif (al == 4 || al == 5 || al == 6) ;Movimento para baixo direc = 4, 5 ou 6
+        .elseif (al >= 4 && al <= 6) ;Movimento para baixo direc = 4, 5 ou 6
             add player1.playerObj.y, SPEED
         .endif
 
-        .if (al == 2 || al == 3 || al == 4) ;Movimento para direita direc = 2, 3 ou 4
+        .if (al >= 2 && al <= 4) ;Movimento para direita direc = 2, 3 ou 4
             add player1.playerObj.x, SPEED
-        .elseif (al == 6 || al == 7 || al == 0) ;Movimento para esquerda direc = 6, 7 ou 0
+        .elseif (al >= 6 || al == 0) ;Movimento para esquerda direc = 6, 7 ou 0
             sub player1.playerObj.x, SPEED
         .endif
     .endif
@@ -119,15 +134,15 @@ movAll proc ;Atualiza as posições dos tiros e jogadores
     .if (plyrsMoving[1])
         mov al, player2.playerObj.direc
 
-        .if (al == 0 || al == 1 || al == 2) ;Movimento para cima direc = 0, 1 ou 2
+        .if (al >= 0 && al <= 2) ;Movimento para cima direc = 0, 1 ou 2
             sub player2.playerObj.y, SPEED
-        .elseif (al == 4 || al == 5 || al == 6) ;Movimento para baixo direc = 4, 5 ou 6
+        .elseif (al >= 4 && al <= 6) ;Movimento para baixo direc = 4, 5 ou 6
             add player2.playerObj.y, SPEED
         .endif
 
-        .if (al == 2 || al == 3 || al == 4) ;Movimento para direita direc = 2, 3 ou 4
+        .if (al >= 2 && al <= 4) ;Movimento para direita direc = 2, 3 ou 4
             add player2.playerObj.x, SPEED
-        .elseif (al == 6 || al == 7 || al == 0) ;Movimento para esquerda direc = 6, 7 ou 0
+        .elseif (al >= 6 || al == 0) ;Movimento para esquerda direc = 6, 7 ou 0
             sub player2.playerObj.x, SPEED
         .endif
     .endif
