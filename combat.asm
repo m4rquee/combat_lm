@@ -23,24 +23,6 @@ start:
 invoke GetModuleHandle, NULL
 mov hInstance, eax
 
-;Carrega os bitmaps:
-invoke LoadBitmap, hInstance, 100
-mov h100, eax
-invoke LoadBitmap, hInstance, 101
-mov h101, eax
-invoke LoadBitmap, hInstance, 102
-mov h102, eax
-invoke LoadBitmap, hInstance, 103
-mov h103, eax
-invoke LoadBitmap, hInstance, 104
-mov h104, eax
-invoke LoadBitmap, hInstance, 105
-mov h105, eax
-invoke LoadBitmap, hInstance, 106
-mov h106, eax
-invoke LoadBitmap, hInstance, 107
-mov h107, eax
-
 invoke WinMain, hInstance, SW_SHOWDEFAULT
 invoke ExitProcess, eax
 
@@ -108,6 +90,7 @@ WinMain proc hInst:HINSTANCE, CmdShow:dword
 	.endw 
 
     mov eax, msg.wParam ;Return exit code in eax 
+
     ret 
 WinMain endp
 
@@ -115,10 +98,12 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM ;wParam - Parame
                                                                 ;do Windows
     locaL hdc:HDC 
     locaL ps:PAINTSTRUCT
+    locaL hMemDC:HDC 
+    locaL rect:RECT 
 
-    ;invoke InvalidateRect, hWnd, NULL, TRUE ;Dispara o evento de paint da tela
-
-    .if uMsg == WM_DESTROY ;If the user closes the window 
+    .if uMsg == WM_CREATE 
+        invoke loadBitmaps
+    .elseif uMsg == WM_DESTROY ;If the user closes the window 
         invoke PostQuitMessage, NULL ;Quit the application 
     .elseif uMsg == WM_CHAR ;Keydown printable:
         ;Teclas de movimento player1:
@@ -198,13 +183,15 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM ;wParam - Parame
             .endif
         .endif
 
-    ;.elseif uMsg == WM_PAINT ;Atualizar da página:  
+    .elseif uMsg == WM_PAINT ;Atualizar da página:  
+        invoke updateScreen
     .else ;Default:
         invoke DefWindowProc, hWnd, uMsg, wParam, lParam ;Default processing 
         ret 
     .endif 
 
     xor eax, eax 
+
     ret 
 WndProc endp
 
@@ -235,6 +222,7 @@ movObj proc addrObj:dword ;Atualiza a posição de um gameObj:
     mov [ecx].y, ax
     
     assume ecx:nothing
+
 	ret
 movObj endp
 
@@ -286,5 +274,39 @@ mult proc n1:word, n2:word
     ret
 mult endp
 
+updateScreen proc
+    
+
+    ret
+updateScreen endp
+
+loadBitmaps proc
+    ;Carrega os bitmaps:
+    invoke LoadBitmap, hInstance, 100
+    mov h100, eax
+
+    invoke LoadBitmap, hInstance, 101
+    mov h101, eax
+
+    invoke LoadBitmap, hInstance, 102
+    mov h102, eax
+
+    invoke LoadBitmap, hInstance, 103
+    mov h103, eax
+
+    invoke LoadBitmap, hInstance, 104
+    mov h104, eax
+
+    invoke LoadBitmap, hInstance, 105
+    mov h105, eax
+
+    invoke LoadBitmap, hInstance, 106
+    mov h106, eax
+
+    invoke LoadBitmap, hInstance, 107
+    mov h107, eax
+    loadBitmaps endp
+
+    ret
 end start
 

@@ -77,6 +77,8 @@ hInstance HINSTANCE ?
 ; prototypes
 ;=================
 WinMain proto :DWORD, :DWORD    
+updateScreen proto
+loadBitmaps proto
 
 canMov proto :gameObj, :gameObj ;Atualiza se cada jogador pode se mover
 mult proto :WORD, :WORD ;Multiplica dois números e coloca em eax
