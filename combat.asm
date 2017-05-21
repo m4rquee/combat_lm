@@ -9,6 +9,7 @@ include combat.inc
     player1 player <MAX_LIFE, <?, WIN_HT / 2, <0, 0>>>
     player2 player <MAX_LIFE, <?, WIN_HT / 2, <0, 0>>>
 
+    isPlyrsMoving pair <0, 0> ;Indica se cada jogador está se movendo
     isShooting pair <0, 0> ;Indica se cada jogador está atirando
     score pair <0, 0> ;Score de cada jogador
 
@@ -187,59 +188,61 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM ;wParam - Parame
 WndProc endp
 
 movAll proc ;Atualiza as posições dos tiros e jogadores
-    ;Movimenta jogadores no eixo x:
+    ;Movimenta jogadores:
+
     ;Player1:
-    mov ax, player1.playerObj.x
-    movzx bx, player1.playerObj.speed.x
+    .if isPlyrsMoving.x
+        ;Eixo x:
+        mov ax, player1.playerObj.x
+        movzx bx, player1.playerObj.speed.x
 
-    .if bx > 7fh ;Caso seja negativo:
-        xor bx, ffh
-        not bx
+        .if bx > 7fh ;Caso seja negativo:
+            xor bx, 255
+            not bx
+        .endif
+
+        add ax, bx
+        mov player1.playerObj.x, ax
+
+        ;Eixo y:
+        mov ax, player1.playerObj.y
+        movzx bx, player1.playerObj.speed.y
+
+        .if bx > 7fh ;Caso seja negativo:
+            xor bx, 255
+            not bx
+        .endif
+
+        add ax, bx
+        mov player1.playerObj.y, ax
     .endif
-
-    add ax, bx
-
-    mov player1.playerObj.x, ax
 
     ;Player2:
-    mov ax, player2.playerObj.x
-    movzx bx, player2.playerObj.speed.x
+    .if isPlyrsMoving.y
+        ;Eixo x:
+        mov ax, player2.playerObj.x
+        movzx bx, player2.playerObj.speed.x
 
-    .if bx > 7fh ;Caso seja negativo:
-        xor bx, ffh
-        not bx
+        .if bx > 7fh ;Caso seja negativo:
+            xor bx, 255
+            not bx
+        .endif
+
+        add ax, bx
+        mov player2.playerObj.x, ax
+
+        ;Eixo y:
+        mov ax, player2.playerObj.y
+        movzx bx, player2.playerObj.speed.y
+
+        .if bx > 7fh ;Caso seja negativo:
+            xor bx, 255
+            not bx
+        .endif
+
+        add ax, bx
+        mov player2.playerObj.y, ax
     .endif
-
-    add ax, bx
-
-    mov player2.playerObj.x, ax
-
-    ;Movimenta jogadores no eixo y:
-    ;Player1:
-    mov ax, player1.playerObj.y
-    movzx bx, player1.playerObj.speed.y
-
-    .if bx > 7fh ;Caso seja negativo:
-        xor bx, ffh
-        not bx
-    .endif
-
-    add ax, bx
-
-    mov player1.playerObj.y, ax
-
-    ;Player2:
-    mov ax, player2.playerObj.y
-    movzx bx, player2.playerObj.speed.y
-
-    .if bx > 7fh ;Caso seja negativo:
-        xor bx, ffh
-        not bx
-    .endif
-
-    add ax, bx
-
-    mov player2.playerObj.y, ax
 
     ;Movimenta os tiros:
 	ret
