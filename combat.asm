@@ -187,7 +187,7 @@ WndProc endp
 movAll proc ;Atualiza as posições dos tiros e jogadores
     ;Movimenta jogadores no eixo x:
     ;Player1:
-    mov eax, player1.playerObj.x
+    mov ax, player1.playerObj.x
 
     .if player1.playerObj.speed.x < 0
         ;Remove complemento de dois:
@@ -195,16 +195,18 @@ movAll proc ;Atualiza as posições dos tiros e jogadores
         xor bl, 1
         not bl
 
-        sub eax, ebx
+        shr ebx, 16
+
+        sub ax, bx
     .else
-        movzx ebx, player1.playerObj.speed.x
-        add eax, ebx
+        movzx bx, player1.playerObj.speed.x
+        add ax, bx
     .endif
 
-    mov player1.playerObj.x, eax
+    mov player1.playerObj.x, ax
 
     ;Player2:
-    mov eax, player2.playerObj.x
+    mov ax, player2.playerObj.x
 
     .if player2.playerObj.speed.x < 0
         ;Remove complemento de dois:
@@ -212,17 +214,19 @@ movAll proc ;Atualiza as posições dos tiros e jogadores
         xor bl, 1
         not bl
 
-        sub eax, ebx
+        shr ebx, 16
+
+        sub ax, bx
     .else
-        movzx ebx, player2.playerObj.speed.x
-        add eax, ebx
+        movzx bx, player2.playerObj.speed.x
+        add ax, bx
     .endif
 
-    mov player2.playerObj.x, eax
+    mov player2.playerObj.x, ax
 
     ;Movimenta jogadores no eixo y:
     ;Player1:
-    mov eax, player1.playerObj.y
+    mov ax, player1.playerObj.y
 
     .if player1.playerObj.speed.y < 0
         ;Remove complemento de dois:
@@ -230,16 +234,18 @@ movAll proc ;Atualiza as posições dos tiros e jogadores
         xor bl, 1
         not bl
 
-        sub eax, ebx
+        shr ebx, 16
+
+        sub ax, bx
     .else
-        movzx ebx, player1.playerObj.speed.y
-        add eax, ebx
+        movzx bx, player1.playerObj.speed.y
+        add ax, bx
     .endif
 
-    mov player1.playerObj.y, eax
+    mov player1.playerObj.y, ax
 
     ;Player2:
-    mov eax, player2.playerObj.y
+    mov ax, player2.playerObj.y
 
     .if player2.playerObj.speed.y < 0
         ;Remove complemento de dois:
@@ -247,13 +253,15 @@ movAll proc ;Atualiza as posições dos tiros e jogadores
         xor bl, 1
         not bl
 
-        sub eax, ebx
+        shr ebx, 16
+
+        sub ax, bx
     .else
-        movzx ebx, player2.playerObj.speed.y
-        add eax, ebx
+        movzx bx, player2.playerObj.speed.y
+        add ax, bx
     .endif
 
-    mov player2.playerObj.y, eax
+    mov player2.playerObj.y, ax
 
     ;Movimenta os tiros:
 

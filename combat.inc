@@ -24,8 +24,8 @@ pair struct ;Par ordenado:
 pair ends
 
 gameObj struct ;Objeto primário:
-	x  dd ?
-    y  dd ?
+	x  dw ?
+    y  dw ?
     
 	speed pair <>
 gameObj ends
