@@ -81,6 +81,8 @@ WinMain proc hInst:HINSTANCE, hPrevInst:HINSTANCE, CmdLine:LPSTR, CmdShow:DWORD
 
         invoke TranslateMessage, addr msg 
         invoke DispatchMessage, addr msg
+
+		invoke movAll
 	.endw 
 
     mov eax, msg.wParam ;Return exit code in eax 
@@ -118,19 +120,19 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM ;wParam - Parame
     .elseif uMsg == WM_DEADCHAR ;Keyup printable:
         ;Teclas de movimento player1:
         .if (wParam == 77h) ;w
-            .if (player1.playerObj.speed.y < 0)
+            .if (player1.playerObj.speed.y > 7fh)
                 mov player1.playerObj.speed.y, 0 
             .endif
         .elseif (wParam == 61h) ;a
-            .if (player1.playerObj.speed.x < 0)
+            .if (player1.playerObj.speed.x > 7fh)
                 mov player1.playerObj.speed.x, 0 
             .endif
         .elseif (wParam == 73h) ;s
-            .if (player1.playerObj.speed.y > 0)
+            .if (player1.playerObj.speed.y < 80h)
                 mov player1.playerObj.speed.y, 0 
             .endif
         .elseif (wParam == 64h) ;d
-            .if (player1.playerObj.speed.x > 0)
+            .if (player1.playerObj.speed.x < 80h)
                 mov player1.playerObj.speed.x, 0 
             .endif
 
@@ -145,36 +147,36 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM ;wParam - Parame
     .elseif uMsg == WM_KEYDOWN ;Keydown nonprintable:
         ;Teclas de movimento player2:
         .if (wParam == VK_UP) ;seta cima
-            mov player1.playerObj.speed.y, -SPEED
+            mov player2.playerObj.speed.y, -SPEED
         .elseif (wParam == VK_DOWN) ;seta baixo
-            mov player1.playerObj.speed.y, SPEED
+            mov player2.playerObj.speed.y, SPEED
         .elseif (wParam == VK_LEFT) ;seta esquerda
-            mov player1.playerObj.speed.x, -SPEED
+            mov player2.playerObj.speed.x, -SPEED
         .elseif (wParam == VK_RIGHT) ;seta direita
-            mov player1.playerObj.speed.x, SPEED
+            mov player2.playerObj.speed.x, SPEED
         .endif
 
     .elseif uMsg == WM_KEYUP ;Keyup nonprintable:
         ;Teclas de movimento player2:
         .if (wParam == VK_UP) ;seta cima
-            .if (player2.playerObj.speed.y < 0)
+            .if (player2.playerObj.speed.y > 7fh)
                 mov player2.playerObj.speed.y, 0 
             .endif
         .elseif (wParam == VK_DOWN) ;seta baixo
-            .if (player2.playerObj.speed.y > 0)
+            .if (player2.playerObj.speed.y < 80h)
                 mov player2.playerObj.speed.y, 0 
             .endif
         .elseif (wParam == VK_LEFT) ;seta esquerda
-            .if (player2.playerObj.speed.x < 0)
+            .if (player2.playerObj.speed.x > 7fh)
                 mov player2.playerObj.speed.x, 0 
             .endif
         .elseif (wParam == VK_RIGHT) ;seta direita
-            .if (player2.playerObj.speed.x > 0)
+            .if (player1.playerObj.speed.x < 80h)
                 mov player2.playerObj.speed.x, 0 
             .endif
         .endif
 
-    .elseif uMsg == WM_PAINT ;Atualizar da página:  
+    ;.elseif uMsg == WM_PAINT ;Atualizar da página:  
     .else ;Default:
         invoke DefWindowProc, hWnd, uMsg, wParam, lParam ;Default processing 
         ret 
@@ -189,7 +191,7 @@ movAll proc ;Atualiza as posições dos tiros e jogadores
     ;Player1:
     mov ax, player1.playerObj.x
 
-    .if player1.playerObj.speed.x < 0
+    .if player1.playerObj.speed.x > 7fh
         ;Remove complemento de dois:
         mov bl, player1.playerObj.speed.x
         xor bl, 1
@@ -208,7 +210,7 @@ movAll proc ;Atualiza as posições dos tiros e jogadores
     ;Player2:
     mov ax, player2.playerObj.x
 
-    .if player2.playerObj.speed.x < 0
+    .if player2.playerObj.speed.x > 7fh
         ;Remove complemento de dois:
         mov bl, player2.playerObj.speed.x
         xor bl, 1
@@ -228,7 +230,7 @@ movAll proc ;Atualiza as posições dos tiros e jogadores
     ;Player1:
     mov ax, player1.playerObj.y
 
-    .if player1.playerObj.speed.y < 0
+    .if player1.playerObj.speed.y > 7fh
         ;Remove complemento de dois:
         mov bl, player1.playerObj.speed.y
         xor bl, 1
@@ -247,7 +249,7 @@ movAll proc ;Atualiza as posições dos tiros e jogadores
     ;Player2:
     mov ax, player2.playerObj.y
 
-    .if player2.playerObj.speed.y < 0
+    .if player2.playerObj.speed.y > 7fh
         ;Remove complemento de dois:
         mov bl, player2.playerObj.speed.y
         xor bl, 1
@@ -264,7 +266,7 @@ movAll proc ;Atualiza as posições dos tiros e jogadores
     mov player2.playerObj.y, ax
 
     ;Movimenta os tiros:
-
+	ret
 movAll endp
 
 end start
