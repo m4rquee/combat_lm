@@ -6,10 +6,10 @@ include combat.inc
 
 .data
     ;Estruturas dos jogadores:
-    player1 player <MAX_LIFE, <?, WIN_HT / 2, <0, 0>>>
-    player2 player <MAX_LIFE, <?, WIN_HT / 2, <0, 0>>>
+    player1 player <MAX_LIFE, <?, WIN_HT / 2, <SPEED, 0>>>
+    player2 player <MAX_LIFE, <?, WIN_HT / 2, <0, -SPEED>>>
 
-    isPlyrsMoving pair <0, 0> ;Indica se cada jogador está se movendo
+    canPlyrsMov pair <0, 0> ;Indica se cada jogador pode se mover
     isShooting pair <0, 0> ;Indica se cada jogador está atirando
     score pair <0, 0> ;Score de cada jogador
 
@@ -23,16 +23,16 @@ start:
 invoke GetModuleHandle, NULL
 mov hInstance, eax
 
-invoke WinMain, hInstance, NULL, NULL, SW_SHOWDEFAULT
+invoke WinMain, hInstance, SW_SHOWDEFAULT
 invoke ExitProcess, eax
 
-WinMain proc hInst:HINSTANCE, hPrevInst:HINSTANCE, CmdLine:LPSTR, CmdShow:DWORD
+WinMain proc hInst:HINSTANCE, CmdShow:dword
 	local wc:WNDCLASSEX                                            
     local msg:MSG 
     local hwnd:HWND
 
-    local Wwd  :DWORD
-    local Wht  :DWORD
+    local Wwd:dword
+    local Wht:dword
 
 	;Fill values in members of wc
     mov wc.cbSize, SIZEOF WNDCLASSEX  
@@ -78,8 +78,15 @@ WinMain proc hInst:HINSTANCE, hPrevInst:HINSTANCE, CmdLine:LPSTR, CmdShow:DWORD
         invoke TranslateMessage, addr msg 
         invoke DispatchMessage, addr msg
 
-        invoke canMov
-		invoke movAll
+        invoke canMov, player1.playerObj, player2.playerObj
+
+        .if canPlyrsMov.x
+		  invoke movObj, addr player1.playerObj
+        .endif
+
+        .if canPlyrsMov.y
+          invoke movObj, addr player2.playerObj
+        .endif
 	.endw 
 
     mov eax, msg.wParam ;Return exit code in eax 
@@ -183,68 +190,83 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM ;wParam - Parame
     ret 
 WndProc endp
 
-movAll proc ;Atualiza as posições dos tiros e jogadores:
-    ;Movimenta jogadores:
+movObj proc addrObj:dword ;Atualiza a posição de um gameObj:
+	assume ecx:ptr gameObj
+    mov ecx, addrObj
+    
+    ;Eixo x:
+    mov ax, [ecx].x
+    movzx bx, [ecx].speed.x
 
-    ;Player1:
-    .if isPlyrsMoving.x
-        ;Eixo x:
-        mov ax, player1.playerObj.x
-        movzx bx, player1.playerObj.speed.x
-
-        .if bx > 7fh ;Caso seja negativo:
-            or bx, 65280
-        .endif
-
-        add ax, bx
-        mov player1.playerObj.x, ax
-
-        ;Eixo y:
-        mov ax, player1.playerObj.y
-        movzx bx, player1.playerObj.speed.y
-
-        .if bx > 7fh ;Caso seja negativo:
-            or bx, 65280
-        .endif
-
-        add ax, bx
-        mov player1.playerObj.y, ax
+    .if bx > 7fh ;Caso seja negativo:
+        or bx, 65280
     .endif
 
-    ;Player2:
-    .if isPlyrsMoving.y
-        ;Eixo x:
-        mov ax, player2.playerObj.x
-        movzx bx, player2.playerObj.speed.x
+    add ax, bx
+    mov [ecx].x, ax
 
-        .if bx > 7fh ;Caso seja negativo:
-            or bx, 65280
-        .endif
+    ;Eixo y:
+    mov ax, [ecx].y
+    movzx bx, [ecx].speed.y
 
-        add ax, bx
-        mov player2.playerObj.x, ax
-
-        ;Eixo y:
-        mov ax, player2.playerObj.y
-        movzx bx, player2.playerObj.speed.y
-
-        .if bx > 7fh ;Caso seja negativo:
-            or bx, 65280
-        .endif
-
-        add ax, bx
-        mov player2.playerObj.y, ax
+    .if bx > 7fh ;Caso seja negativo:
+        or bx, 65280
     .endif
 
-    ;Movimenta os tiros:
+    add ax, bx
+    mov [ecx].y, ax
+    
+    assume ecx:nothing
 	ret
-movAll endp
+movObj endp
 
-canMov proc ;Atualiza se cada jogador está se movendo:
-    mov isPlyrsMoving.x, 1
-    mov isPlyrsMoving.y, 1
+canMov proc p1:gameObj, p2:gameObj ;Atualiza se cada jogador pode se mover:
+    local d2:dword
+
+    invoke movObj, addr p1
+    invoke movObj, addr p2   
+
+    mov ax, p2.x 
+    sub ax, p1.x
+    invoke mult, ax, ax
+    mov d2, eax
+
+    mov ax, p2.y 
+    sub ax, p1.y
+    invoke mult, ax, ax
+    add d2, eax
+
+    .if d2 < IMG_SIZE2
+        mov canPlyrsMov.x, 0
+        mov canPlyrsMov.y, 0
+        ret
+    .endif
+    
+    mov canPlyrsMov.x, 0
+    .if p1.x > OFFSETX && p1.x < IMG_SIZE\
+        && p1.y > OFFSETY && p1.y < IMG_SIZE
+        mov canPlyrsMov.x, 1    
+    .endif
+
+    mov canPlyrsMov.y, 0
+    .if p2.x > OFFSETX && p2.x < IMG_SIZE\
+        && p2.y > OFFSETY && p2.y < IMG_SIZE
+        mov canPlyrsMov.y, 1    
+    .endif
 
     ret
 canMov endp
+
+mult proc n1:word, n2:word
+	xor eax, eax 
+    mov ax, n1
+    mov bx, n2
+
+    imul bx
+    add eax, edx
+
+    ret
+mult endp
+
 end start
 

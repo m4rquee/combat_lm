@@ -42,8 +42,11 @@ player ends
 	WIN_WD equ 1500 ;Largura da janela
 	WIN_HT equ 1000 ;Altura da janela
 
+    OFFSETX equ WIN_WD - IMG_SIZE
+    OFFSETY equ WIN_HT - IMG_SIZE
+
     IMG_SIZE equ 32 ;Altura e largura da img do jogador
-    IMG_SIZE2 equ IMG_SIZE * IMG_SIZE
+    IMG_SIZE2 equ IMG_SIZE * IMG_SIZE ;Altura * largura
 
     SPEED equ 1 ;Velocidade dos jogadores
 	MAX_SCORE equ 5 ;Score máximo para o termino do jogo
@@ -64,7 +67,10 @@ hInstance HINSTANCE ?
 ;=================
 ; prototypes
 ;=================
+WinMain proto :DWORD, :DWORD    
 
-WinMain proto :DWORD, :DWORD, :DWORD, :DWORD    
-movAll proto ;Atualiza as posições dos tiros e jogadores
-canMov proto ;Atualiza se cada jogador está se movendo
+canMov proto :gameObj, :gameObj ;Atualiza se cada jogador pode se mover
+mult proto :WORD, :WORD ;Multiplica dois números e coloca em eax
+movObj proto :DWORD ;Atualiza a posição de um gameObj
+
+
