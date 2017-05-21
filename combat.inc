@@ -76,12 +76,13 @@ hInstance HINSTANCE ?
 ;=================
 ; prototypes
 ;=================
-WinMain proto :DWORD, :DWORD    
-updateScreen proto
-loadBitmaps proto
+WinMain proto :DWORD, :DWORD   
+ 
+updateScreen proto ;Desenha na tela todos os objetos
+loadBitmaps proto ;Carrega os bitmaps do jogo
 
 canMov proto :gameObj, :gameObj ;Atualiza se cada jogador pode se mover
-mult proto :WORD, :WORD ;Multiplica dois números e coloca em eax
+mult proto :WORD, :WORD ;Multiplica dois números (16 b) e coloca em eax
 movObj proto :DWORD ;Atualiza a posição de um gameObj
 
 

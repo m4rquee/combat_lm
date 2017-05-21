@@ -103,7 +103,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM ;wParam - Parame
 
     .if uMsg == WM_CREATE 
         invoke loadBitmaps
-    .elseif uMsg == WM_DESTROY ;If the user closes the window 
+    .elseif uMsg == WM_DESTROY ;If the user closes the window  
         invoke PostQuitMessage, NULL ;Quit the application 
     .elseif uMsg == WM_CHAR ;Keydown printable:
         ;Teclas de movimento player1:
@@ -185,7 +185,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM ;wParam - Parame
 
     .elseif uMsg == WM_PAINT ;Atualizar da página:  
         invoke updateScreen
-    .else ;Default:
+    .else ;Default:''
         invoke DefWindowProc, hWnd, uMsg, wParam, lParam ;Default processing 
         ret 
     .endif 
@@ -227,33 +227,41 @@ movObj proc addrObj:dword ;Atualiza a posição de um gameObj:
 movObj endp
 
 canMov proc p1:gameObj, p2:gameObj ;Atualiza se cada jogador pode se mover:
-    local d2:dword
+    local d2:dword ;Quadrado da distância entre os jogadores
+                   ;d^2=(x2-x1)^2 + (y2-y1)^2
 
-    invoke movObj, addr p1
+    ;Move uma cópia dos jogadores para uma posição futura:
+    invoke movObj, addr p1 
     invoke movObj, addr p2   
 
+    ;Calcula (x2-x1)^2 e coloca em d2:
     mov ax, p2.x 
     sub ax, p1.x
     invoke mult, ax, ax
     mov d2, eax
 
+    ;Calcula (y2-y1)^2 e soma em d2:
     mov ax, p2.y 
     sub ax, p1.y
     invoke mult, ax, ax
     add d2, eax
 
+    ;Checa se os jogadores vão colidir:
     .if d2 < IMG_SIZE2
         mov canPlyrsMov.x, 0
         mov canPlyrsMov.y, 0
         ret
     .endif
     
+    ;Checa se cada jogador vai sair da tela:
+    ;Player1:
     mov canPlyrsMov.x, 0
     .if p1.x > OFFSETX && p1.x < IMG_SIZE\
         && p1.y > OFFSETY && p1.y < IMG_SIZE
         mov canPlyrsMov.x, 1    
     .endif
 
+    ;Player2:
     mov canPlyrsMov.y, 0
     .if p2.x > OFFSETX && p2.x < IMG_SIZE\
         && p2.y > OFFSETY && p2.y < IMG_SIZE
@@ -263,7 +271,7 @@ canMov proc p1:gameObj, p2:gameObj ;Atualiza se cada jogador pode se mover:
     ret
 canMov endp
 
-mult proc n1:word, n2:word
+mult proc n1:word, n2:word ;Multiplica dois números (16 b) e coloca em eax:
 	xor eax, eax 
     mov ax, n1
     mov bx, n2
@@ -274,14 +282,26 @@ mult proc n1:word, n2:word
     ret
 mult endp
 
-updateScreen proc
-    
+updateScreen proc ;Desenha na tela todos os objetos:
+    ;invoke BeginPaint, hWnd, addr ps 
+    ;mov hdc, eax 
+
+    ;invoke CreateCompatibleDC, hdc 
+    ;mov hMemDC, eax 
+
+    ;invoke SelectObject, hMemDC, hBitmap 
+
+    ;invoke GetClientRect, hWnd, addr rect 
+    ;invoke BitBlt, hdc, 0, 0, rect.right, rect.bottom, hMemDC, 0, 0, SRCCOPY 
+
+    ;invoke DeleteDC, hMemDC 
+
+    ;invoke EndPaint, hWnd, addr ps 
 
     ret
 updateScreen endp
 
-loadBitmaps proc
-    ;Carrega os bitmaps:
+loadBitmaps proc ;Carrega os bitmaps do jogo:
     invoke LoadBitmap, hInstance, 100
     mov h100, eax
 
