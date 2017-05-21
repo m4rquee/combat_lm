@@ -47,6 +47,7 @@ player ends
 
     IMG_SIZE equ 32 ;Altura e largura da img do jogador
     IMG_SIZE2 equ IMG_SIZE * IMG_SIZE ;Altura * largura
+    HALF_SIZE equ IMG_SIZE / 2 
 
     SPEED equ 1 ;Velocidade dos jogadores
 	MAX_SCORE equ 5 ;Score máximo para o termino do jogo
@@ -77,9 +78,10 @@ hInstance HINSTANCE ?
 ; prototypes
 ;=================
 WinMain proto :DWORD, :DWORD   
- 
-updateScreen proto ;Desenha na tela todos os objetos
 loadBitmaps proto ;Carrega os bitmaps do jogo
+
+printPlyr proto :gameObj, :HDC, :HDC  ;Desenha o jogador indicado (0 ou 1)
+updateScreen proto :HWND ;Desenha na tela todos os objetos
 
 canMov proto :gameObj, :gameObj ;Atualiza se cada jogador pode se mover
 mult proto :WORD, :WORD ;Multiplica dois números (16 b) e coloca em eax

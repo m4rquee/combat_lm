@@ -6,8 +6,8 @@ include combat.inc
 
 .data
     ;Estruturas dos jogadores:
-    player1 player <MAX_LIFE, <?, WIN_HT / 2, <SPEED, 0>>>
-    player2 player <MAX_LIFE, <?, WIN_HT / 2, <0, -SPEED>>>
+    player1 player <MAX_LIFE, <HALF_SIZE, WIN_HT / 2, <-SPEED, 0>>>
+    player2 player <MAX_LIFE, <WIN_WD - HALF_SIZE, WIN_HT / 2, <SPEED, 0>>>
 
     canPlyrsMov pair <0, 0> ;Indica se cada jogador pode se mover
     isShooting pair <0, 0> ;Indica se cada jogador está atirando
@@ -61,10 +61,10 @@ WinMain proc hInst:HINSTANCE, CmdShow:dword
     mov Wht, WIN_HT
 
     invoke CreateWindowEx, NULL, addr ClassName, addr AppName,\ 
-                WS_OVERLAPPED or WS_SYSMENU or WS_MINIMIZEBOX,\ 
-                CW_USEDEFAULT, CW_USEDEFAULT,\
-                Wwd, Wht,\ 
-                NULL, NULL, hInst, NULL 
+        WS_OVERLAPPED or WS_SYSMENU or WS_MINIMIZEBOX,\ 
+        CW_USEDEFAULT, CW_USEDEFAULT,\
+        Wwd, Wht,\ 
+        NULL, NULL, hInst, NULL 
 
     mov hwnd, eax 
     invoke ShowWindow, hwnd, CmdShow ;Display our window on desktop 
@@ -78,15 +78,15 @@ WinMain proc hInst:HINSTANCE, CmdShow:dword
         invoke TranslateMessage, addr msg 
         invoke DispatchMessage, addr msg
 
-        invoke canMov, player1.playerObj, player2.playerObj
+        ;invoke canMov, player1.playerObj, player2.playerObj
 
-        .if canPlyrsMov.x
-		  invoke movObj, addr player1.playerObj
-        .endif
+        ;.if canPlyrsMov.x
+		  ;invoke movObj, addr player1.playerObj
+        ;.endif
 
-        .if canPlyrsMov.y
-          invoke movObj, addr player2.playerObj
-        .endif
+        ;.if canPlyrsMov.y
+          ;invoke movObj, addr player2.playerObj
+        ;.endif
 	.endw 
 
     mov eax, msg.wParam ;Return exit code in eax 
@@ -96,11 +96,6 @@ WinMain endp
 
 WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM ;wParam - Parametro recebido 
                                                                 ;do Windows
-    locaL hdc:HDC 
-    locaL ps:PAINTSTRUCT
-    locaL hMemDC:HDC 
-    locaL rect:RECT 
-
     .if uMsg == WM_CREATE 
         invoke loadBitmaps
     .elseif uMsg == WM_DESTROY ;If the user closes the window  
@@ -184,8 +179,8 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM ;wParam - Parame
         .endif
 
     .elseif uMsg == WM_PAINT ;Atualizar da página:  
-        invoke updateScreen
-    .else ;Default:''
+        invoke updateScreen, hWnd
+    .else ;Default:
         invoke DefWindowProc, hWnd, uMsg, wParam, lParam ;Default processing 
         ret 
     .endif 
@@ -282,24 +277,63 @@ mult proc n1:word, n2:word ;Multiplica dois números (16 b) e coloca em eax:
     ret
 mult endp
 
-updateScreen proc ;Desenha na tela todos os objetos:
-    ;invoke BeginPaint, hWnd, addr ps 
-    ;mov hdc, eax 
+updateScreen proc hWnd:HWND ;Desenha na tela todos os objetos:
+    locaL ps:PAINTSTRUCT
+    locaL hMemDC:HDC 
+    locaL hdc:HDC 
 
-    ;invoke CreateCompatibleDC, hdc 
-    ;mov hMemDC, eax 
+    invoke BeginPaint, hWnd, addr ps 
+    mov hdc, eax 
 
-    ;invoke SelectObject, hMemDC, hBitmap 
+    invoke CreateCompatibleDC, hdc 
+    mov hMemDC, eax 
+     
+    invoke printPlyr, player1.playerObj, hdc, hMemDC 
+    invoke printPlyr, player2.playerObj, hdc, hMemDC
 
-    ;invoke GetClientRect, hWnd, addr rect 
-    ;invoke BitBlt, hdc, 0, 0, rect.right, rect.bottom, hMemDC, 0, 0, SRCCOPY 
+    invoke DeleteDC, hMemDC 
 
-    ;invoke DeleteDC, hMemDC 
-
-    ;invoke EndPaint, hWnd, addr ps 
+    invoke EndPaint, hWnd, addr ps 
 
     ret
 updateScreen endp
+
+printPlyr proc plyr:gameObj, _hdc:HDC, _hMemDC:HDC 
+    .if plyr.speed.x == 0 ;Caso seja 0:
+        .if plyr.speed.y > 7fh ;Caso seja negativo:
+            invoke SelectObject, _hMemDC, h101 
+        .else ;Caso seja 0:
+            invoke SelectObject, _hMemDC, h100 
+        .endif
+    .elseif plyr.speed.x < 80h ;Caso seja positivo:
+        .if plyr.speed.y == 0 ;Caso seja 0:
+            invoke SelectObject, _hMemDC, h103
+        .elseif plyr.speed.y < 80h ;Caso seja positivo:
+            invoke SelectObject, _hMemDC, h104 
+        .elseif plyr.speed.y > 7fh ;Caso seja negativo:
+            invoke SelectObject, _hMemDC, h102 
+        .endif
+    .else ;Caso seja negativo:
+        .if plyr.speed.y == 0 ;Caso seja 0:
+            invoke SelectObject, _hMemDC, h107
+        .elseif plyr.speed.y < 80h ;Caso seja positivo:
+            invoke SelectObject, _hMemDC, h106 
+        .elseif plyr.speed.y > 7fh ;Caso seja negativo:
+            invoke SelectObject, _hMemDC, h100 
+        .endif
+    .endif
+    
+	movzx eax, plyr.x
+	movzx ebx, plyr.y
+	sub eax, HALF_SIZE
+	sub ebx, HALF_SIZE
+
+    invoke BitBlt, _hdc, eax, ebx,\
+        IMG_SIZE, IMG_SIZE,\
+        _hMemDC, 0, 0, SRCCOPY
+
+    ret
+printPlyr endp
 
 loadBitmaps proc ;Carrega os bitmaps do jogo:
     invoke LoadBitmap, hInstance, 100
