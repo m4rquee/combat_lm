@@ -18,27 +18,21 @@ includelib C:\masm32\lib\shell32.lib
 ;=================
 ; structs
 ;=================
-pair struct ;Par ordenado
-    x  dw ?
-    y  dw ?
+pair struct ;Par ordenado:
+    x  db ?
+    y  db ?
 pair ends
 
-oriObj struct ;Objeto orientado
-	x  dw ?
-    y  dw ?
+gameObj struct ;Objeto primário:
+	x  dd ?
+    y  dd ?
     
-	direc db ? ;Indica a direção que o objeto está apontando (entre -1 e 7, 
-               ;sendo que -1 significa que não existe):
-			   ; 0-1-2
-			   ; |   |
-    		   ; 7   3
-    		   ; |   |
-    		   ; 6-5-4
-oriObj ends
+	speed pair <>
+gameObj ends
 
-player struct ;Dados de um jogador
+player struct ;Dados de um jogador:
     life db ?
-    playerObj oriObj <>
+    playerObj gameObj <>
 player ends
 
 ;=================

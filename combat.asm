@@ -5,15 +5,16 @@ option casemap :none
 include combat.inc
 
 .data
-    player1 player <MAX_LIFE, <?, WIN_HT / 2, 7>>
-    player2 player <MAX_LIFE, <?, WIN_HT / 2, 3>>
+    ;Estruturas dos jogadores:
+    player1 player <MAX_LIFE, <?, WIN_HT / 2, <0, 0>>>
+    player2 player <MAX_LIFE, <?, WIN_HT / 2, <0, 0>>>
 
-    plyrsMoving pair <0, 0> ;Indica se cada jogador está se movendo
-    score pair <0, 0>
+    isShooting pair <0, 0> ;Indica se cada jogador está atirando
+    score pair <0, 0> ;Score de cada jogador
 
     ;Lista de tiros de cada jogador:
-    shots1 oriObj TRACKED_SHOTS dup (<?, ?, -1>)  
-    shots2 oriObj TRACKED_SHOTS dup (<?, ?, -1>)
+    shots1 gameObj TRACKED_SHOTS dup (<?, ?, <0, 0>>)  
+    shots2 gameObj TRACKED_SHOTS dup (<?, ?, <0, 0>>)
 
 .code 
 start:
@@ -98,41 +99,84 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM ;wParam - Parame
     .elseif uMsg == WM_CHAR ;Keydown printable:
         ;Teclas de movimento player1:
         .if (wParam == 77h) ;w
-
+            mov player1.playerObj.speed.y, -SPEED 
         .elseif (wParam == 61h) ;a
-
+            mov player1.playerObj.speed.x, -SPEED
         .elseif (wParam == 73h) ;s
-
+            mov player1.playerObj.speed.y, SPEED
         .elseif (wParam == 64h) ;d
+            mov player1.playerObj.speed.x, SPEED
 
         .elseif (wParam == 79h) ;y - Tiro player1:
-
+            mov isShooting.x, TRUE
         .elseif (wParam == 75h) ;u - Especial player1:
-
         .elseif (wParam == 32h) ;2 - Tiro player2:
-
+            mov isShooting.y, TRUE
         .elseif (wParam == 33h) ;3 - Especial player2:
         .endif
 
     .elseif uMsg == WM_DEADCHAR ;Keyup printable:
+        ;Teclas de movimento player1:
+        .if (wParam == 77h) ;w
+            .if (player1.playerObj.speed.y < 0)
+                mov player1.playerObj.speed.y, 0 
+            .endif
+        .elseif (wParam == 61h) ;a
+            .if (player1.playerObj.speed.x < 0)
+                mov player1.playerObj.speed.x, 0 
+            .endif
+        .elseif (wParam == 73h) ;s
+            .if (player1.playerObj.speed.y > 0)
+                mov player1.playerObj.speed.y, 0 
+            .endif
+        .elseif (wParam == 64h) ;d
+            .if (player1.playerObj.speed.x > 0)
+                mov player1.playerObj.speed.x, 0 
+            .endif
+
+        .elseif (wParam == 79h) ;y - Tiro player1:
+            mov isShooting.x, FALSE
+        .elseif (wParam == 75h) ;u - Especial player1:
+        .elseif (wParam == 32h) ;2 - Tiro player2:
+            mov isShooting.y, FALSE
+        .elseif (wParam == 33h) ;3 - Especial player2:
+        .endif
 
     .elseif uMsg == WM_KEYDOWN ;Keydown nonprintable:
         ;Teclas de movimento player2:
         .if (wParam == VK_UP) ;seta cima
-
+            mov player1.playerObj.speed.y, -SPEED
         .elseif (wParam == VK_DOWN) ;seta baixo
-
+            mov player1.playerObj.speed.y, SPEED
         .elseif (wParam == VK_LEFT) ;seta esquerda
-
+            mov player1.playerObj.speed.x, -SPEED
         .elseif (wParam == VK_RIGHT) ;seta direita
-
+            mov player1.playerObj.speed.x, SPEED
         .endif
 
     .elseif uMsg == WM_KEYUP ;Keyup nonprintable:
+        ;Teclas de movimento player2:
+        .if (wParam == VK_UP) ;seta cima
+            .if (player2.playerObj.speed.y < 0)
+                mov player2.playerObj.speed.y, 0 
+            .endif
+        .elseif (wParam == VK_DOWN) ;seta baixo
+            .if (player2.playerObj.speed.y > 0)
+                mov player2.playerObj.speed.y, 0 
+            .endif
+        .elseif (wParam == VK_LEFT) ;seta esquerda
+            .if (player2.playerObj.speed.x < 0)
+                mov player2.playerObj.speed.x, 0 
+            .endif
+        .elseif (wParam == VK_RIGHT) ;seta direita
+            .if (player2.playerObj.speed.x > 0)
+                mov player2.playerObj.speed.x, 0 
+            .endif
+        .endif
 
     .elseif uMsg == WM_PAINT ;Atualizar da página:  
     .else ;Default:
-        invoke DefWindowProc, hWnd, uMsg, wParam, lParam ;Default message processing 
+        invoke DefWindowProc, hWnd, uMsg, wParam, lParam ;Default processing 
         ret 
     .endif 
 
@@ -141,38 +185,75 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM ;wParam - Parame
 WndProc endp
 
 movAll proc ;Atualiza as posições dos tiros e jogadores
-    ;Movimenta jogadores:
-    .if (plyrsMoving[0])
-        mov al, player1.playerObj.direc
+    ;Movimenta jogadores no eixo x:
+    ;Player1:
+    mov eax, player1.playerObj.x
 
-        .if (al >= 0 && al <= 2) ;Movimento para cima direc = 0, 1 ou 2
-            sub player1.playerObj.y, SPEED
-        .elseif (al >= 4 && al <= 6) ;Movimento para baixo direc = 4, 5 ou 6
-            add player1.playerObj.y, SPEED
-        .endif
+    .if player1.playerObj.speed.x < 0
+        ;Remove complemento de dois:
+        mov bl, player1.playerObj.speed.x
+        xor bl, 1
+        not bl
 
-        .if (al >= 2 && al <= 4) ;Movimento para direita direc = 2, 3 ou 4
-            add player1.playerObj.x, SPEED
-        .elseif (al >= 6 || al == 0) ;Movimento para esquerda direc = 6, 7 ou 0
-            sub player1.playerObj.x, SPEED
-        .endif
+        sub eax, ebx
+    .else
+        movzx ebx, player1.playerObj.speed.x
+        add eax, ebx
     .endif
 
-    .if (plyrsMoving[1])
-        mov al, player2.playerObj.direc
+    mov player1.playerObj.x, eax
 
-        .if (al >= 0 && al <= 2) ;Movimento para cima direc = 0, 1 ou 2
-            sub player2.playerObj.y, SPEED
-        .elseif (al >= 4 && al <= 6) ;Movimento para baixo direc = 4, 5 ou 6
-            add player2.playerObj.y, SPEED
-        .endif
+    ;Player2:
+    mov eax, player2.playerObj.x
 
-        .if (al >= 2 && al <= 4) ;Movimento para direita direc = 2, 3 ou 4
-            add player2.playerObj.x, SPEED
-        .elseif (al >= 6 || al == 0) ;Movimento para esquerda direc = 6, 7 ou 0
-            sub player2.playerObj.x, SPEED
-        .endif
+    .if player2.playerObj.speed.x < 0
+        ;Remove complemento de dois:
+        mov bl, player2.playerObj.speed.x
+        xor bl, 1
+        not bl
+
+        sub eax, ebx
+    .else
+        movzx ebx, player2.playerObj.speed.x
+        add eax, ebx
     .endif
+
+    mov player2.playerObj.x, eax
+
+    ;Movimenta jogadores no eixo y:
+    ;Player1:
+    mov eax, player1.playerObj.y
+
+    .if player1.playerObj.speed.y < 0
+        ;Remove complemento de dois:
+        mov bl, player1.playerObj.speed.y
+        xor bl, 1
+        not bl
+
+        sub eax, ebx
+    .else
+        movzx ebx, player1.playerObj.speed.y
+        add eax, ebx
+    .endif
+
+    mov player1.playerObj.y, eax
+
+    ;Player2:
+    mov eax, player2.playerObj.y
+
+    .if player2.playerObj.speed.y < 0
+        ;Remove complemento de dois:
+        mov bl, player2.playerObj.speed.y
+        xor bl, 1
+        not bl
+
+        sub eax, ebx
+    .else
+        movzx ebx, player2.playerObj.speed.y
+        add eax, ebx
+    .endif
+
+    mov player2.playerObj.y, eax
 
     ;Movimenta os tiros:
 
