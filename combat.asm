@@ -120,11 +120,11 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM ;wParam - Parame
     .elseif uMsg == WM_DEADCHAR ;Keyup printable:
         ;Teclas de movimento player1:
         .if (wParam == 77h) ;w
-            .if (player1.playerObj.speed.y > 7fh)
+            .if (player1.playerObj.speed.y > 7fh) ;Caso seja negativo:
                 mov player1.playerObj.speed.y, 0 
             .endif
         .elseif (wParam == 61h) ;a
-            .if (player1.playerObj.speed.x > 7fh)
+            .if (player1.playerObj.speed.x > 7fh) ;Caso seja negativo:
                 mov player1.playerObj.speed.x, 0 
             .endif
         .elseif (wParam == 73h) ;s
@@ -159,7 +159,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM ;wParam - Parame
     .elseif uMsg == WM_KEYUP ;Keyup nonprintable:
         ;Teclas de movimento player2:
         .if (wParam == VK_UP) ;seta cima
-            .if (player2.playerObj.speed.y > 7fh)
+            .if (player2.playerObj.speed.y > 7fh) ;Caso seja negativo:
                 mov player2.playerObj.speed.y, 0 
             .endif
         .elseif (wParam == VK_DOWN) ;seta baixo
@@ -167,11 +167,11 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM ;wParam - Parame
                 mov player2.playerObj.speed.y, 0 
             .endif
         .elseif (wParam == VK_LEFT) ;seta esquerda
-            .if (player2.playerObj.speed.x > 7fh)
+            .if (player2.playerObj.speed.x > 7fh) ;Caso seja negativo:
                 mov player2.playerObj.speed.x, 0 
             .endif
         .elseif (wParam == VK_RIGHT) ;seta direita
-            .if (player1.playerObj.speed.x < 80h)
+            .if (player2.playerObj.speed.x < 80h)
                 mov player2.playerObj.speed.x, 0 
             .endif
         .endif
@@ -190,78 +190,54 @@ movAll proc ;Atualiza as posições dos tiros e jogadores
     ;Movimenta jogadores no eixo x:
     ;Player1:
     mov ax, player1.playerObj.x
+    movzx bx, player1.playerObj.speed.x
 
-    .if player1.playerObj.speed.x > 7fh
-        ;Remove complemento de dois:
-        mov bl, player1.playerObj.speed.x
-        xor bl, 1
-        not bl
-
-        shr ebx, 16
-
-        sub ax, bx
-    .else
-        movzx bx, player1.playerObj.speed.x
-        add ax, bx
+    .if bx > 7fh ;Caso seja negativo:
+        xor bx, ffh
+        not bx
     .endif
+
+    add ax, bx
 
     mov player1.playerObj.x, ax
 
     ;Player2:
     mov ax, player2.playerObj.x
+    movzx bx, player2.playerObj.speed.x
 
-    .if player2.playerObj.speed.x > 7fh
-        ;Remove complemento de dois:
-        mov bl, player2.playerObj.speed.x
-        xor bl, 1
-        not bl
-
-        shr ebx, 16
-
-        sub ax, bx
-    .else
-        movzx bx, player2.playerObj.speed.x
-        add ax, bx
+    .if bx > 7fh ;Caso seja negativo:
+        xor bx, ffh
+        not bx
     .endif
+
+    add ax, bx
 
     mov player2.playerObj.x, ax
 
     ;Movimenta jogadores no eixo y:
     ;Player1:
     mov ax, player1.playerObj.y
+    movzx bx, player1.playerObj.speed.y
 
-    .if player1.playerObj.speed.y > 7fh
-        ;Remove complemento de dois:
-        mov bl, player1.playerObj.speed.y
-        xor bl, 1
-        not bl
-
-        shr ebx, 16
-
-        sub ax, bx
-    .else
-        movzx bx, player1.playerObj.speed.y
-        add ax, bx
+    .if bx > 7fh ;Caso seja negativo:
+        xor bx, ffh
+        not bx
     .endif
+
+    add ax, bx
 
     mov player1.playerObj.y, ax
 
     ;Player2:
     mov ax, player2.playerObj.y
+    movzx bx, player2.playerObj.speed.y
 
-    .if player2.playerObj.speed.y > 7fh
-        ;Remove complemento de dois:
-        mov bl, player2.playerObj.speed.y
-        xor bl, 1
-        not bl
-
-        shr ebx, 16
-
-        sub ax, bx
-    .else
-        movzx bx, player2.playerObj.speed.y
-        add ax, bx
+    .if bx > 7fh ;Caso seja negativo:
+        xor bx, ffh
+        not bx
     .endif
+
+    add ax, bx
 
     mov player2.playerObj.y, ax
 
