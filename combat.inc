@@ -61,6 +61,15 @@ player ends
 ClassName db "CombatClass", 0 
 AppName db "Combat", 0 ;Título da janela
 
+h100 dd 0
+h101 dd 0
+h102 dd 0
+h103 dd 0
+h104 dd 0
+h105 dd 0
+h106 dd 0
+h107 dd 0
+
 .data?                
 hInstance HINSTANCE ?  
 

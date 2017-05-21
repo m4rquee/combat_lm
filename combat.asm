@@ -23,6 +23,24 @@ start:
 invoke GetModuleHandle, NULL
 mov hInstance, eax
 
+;Carrega os bitmaps:
+invoke LoadBitmap, hInstance, 100
+mov h100, eax
+invoke LoadBitmap, hInstance, 101
+mov h101, eax
+invoke LoadBitmap, hInstance, 102
+mov h102, eax
+invoke LoadBitmap, hInstance, 103
+mov h103, eax
+invoke LoadBitmap, hInstance, 104
+mov h104, eax
+invoke LoadBitmap, hInstance, 105
+mov h105, eax
+invoke LoadBitmap, hInstance, 106
+mov h106, eax
+invoke LoadBitmap, hInstance, 107
+mov h107, eax
+
 invoke WinMain, hInstance, SW_SHOWDEFAULT
 invoke ExitProcess, eax
 
