@@ -60,16 +60,11 @@ WinMain proc hInst:HINSTANCE, hPrevInst:HINSTANCE, CmdLine:LPSTR, CmdShow:DWORD
     mov Wwd, WIN_WD
     mov Wht, WIN_HT
 
-    invoke CreateWindowEx, NULL,\ 
-                addr ClassName,\ 
-                addr AppName,\ 
+    invoke CreateWindowEx, NULL, addr ClassName, addr AppName,\ 
                 WS_OVERLAPPED or WS_SYSMENU or WS_MINIMIZEBOX,\ 
                 CW_USEDEFAULT, CW_USEDEFAULT,\
                 Wwd, Wht,\ 
-                NULL,\ 
-                NULL,\ 
-                hInst,\ 
-                NULL 
+                NULL, NULL, hInst, NULL 
 
     mov hwnd, eax 
     invoke ShowWindow, hwnd, CmdShow ;Display our window on desktop 
@@ -83,6 +78,7 @@ WinMain proc hInst:HINSTANCE, hPrevInst:HINSTANCE, CmdLine:LPSTR, CmdShow:DWORD
         invoke TranslateMessage, addr msg 
         invoke DispatchMessage, addr msg
 
+        invoke canMov
 		invoke movAll
 	.endw 
 
@@ -187,7 +183,7 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM ;wParam - Parame
     ret 
 WndProc endp
 
-movAll proc ;Atualiza as posições dos tiros e jogadores
+movAll proc ;Atualiza as posições dos tiros e jogadores:
     ;Movimenta jogadores:
 
     ;Player1:
@@ -197,8 +193,7 @@ movAll proc ;Atualiza as posições dos tiros e jogadores
         movzx bx, player1.playerObj.speed.x
 
         .if bx > 7fh ;Caso seja negativo:
-            xor bx, 255
-            not bx
+            or bx, 65280
         .endif
 
         add ax, bx
@@ -209,8 +204,7 @@ movAll proc ;Atualiza as posições dos tiros e jogadores
         movzx bx, player1.playerObj.speed.y
 
         .if bx > 7fh ;Caso seja negativo:
-            xor bx, 255
-            not bx
+            or bx, 65280
         .endif
 
         add ax, bx
@@ -224,8 +218,7 @@ movAll proc ;Atualiza as posições dos tiros e jogadores
         movzx bx, player2.playerObj.speed.x
 
         .if bx > 7fh ;Caso seja negativo:
-            xor bx, 255
-            not bx
+            or bx, 65280
         .endif
 
         add ax, bx
@@ -236,8 +229,7 @@ movAll proc ;Atualiza as posições dos tiros e jogadores
         movzx bx, player2.playerObj.speed.y
 
         .if bx > 7fh ;Caso seja negativo:
-            xor bx, 255
-            not bx
+            or bx, 65280
         .endif
 
         add ax, bx
@@ -248,5 +240,11 @@ movAll proc ;Atualiza as posições dos tiros e jogadores
 	ret
 movAll endp
 
+canMov proc ;Atualiza se cada jogador está se movendo:
+    mov isPlyrsMoving.x, 1
+    mov isPlyrsMoving.y, 1
+
+    ret
+canMov endp
 end start
 

@@ -42,6 +42,9 @@ player ends
 	WIN_WD equ 1500 ;Largura da janela
 	WIN_HT equ 1000 ;Altura da janela
 
+    IMG_SIZE equ 32 ;Altura e largura da img do jogador
+    IMG_SIZE2 equ IMG_SIZE * IMG_SIZE
+
     SPEED equ 1 ;Velocidade dos jogadores
 	MAX_SCORE equ 5 ;Score máximo para o termino do jogo
     MAX_LIFE equ 100 ;Vida inicial dos jogadores
@@ -64,3 +67,4 @@ hInstance HINSTANCE ?
 
 WinMain proto :DWORD, :DWORD, :DWORD, :DWORD    
 movAll proto ;Atualiza as posições dos tiros e jogadores
+canMov proto ;Atualiza se cada jogador está se movendo
