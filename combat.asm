@@ -200,8 +200,10 @@ movObj proc addrObj:dword ;Atualiza a posição de um gameObj de acordo com sua
                         ;velocidade:
 	assume ecx:ptr gameObj
     mov ecx, addrObj
-    
-    ;Eixo x:
+
+    ;Eixo x:---------------------------------------------------------------------
+;________________________________________________________________________________
+
     mov ax, [ecx].x
     movzx bx, [ecx].speed.x
 
@@ -212,7 +214,9 @@ movObj proc addrObj:dword ;Atualiza a posição de um gameObj de acordo com sua
     add ax, bx
     mov [ecx].x, ax
 
-    ;Eixo y:
+    ;Eixo y:---------------------------------------------------------------------
+;________________________________________________________________________________
+
     mov ax, [ecx].y
     movzx bx, [ecx].speed.y
 
@@ -222,6 +226,7 @@ movObj proc addrObj:dword ;Atualiza a posição de um gameObj de acordo com sua
 
     add ax, bx
     mov [ecx].y, ax
+;________________________________________________________________________________
     
     assume ecx:nothing
 
@@ -232,9 +237,14 @@ canMov proc p1:gameObj, p2:gameObj ;Atualiza se cada jogador pode se mover:
     local d2:dword ;Quadrado da distância entre os jogadores
                    ;d^2 = (x2 - x1)^2 + (y2 - y1)^2
 
-    ;Move a cópia dos jogadores para uma posição futura:
+    ;Move a cópia dos jogadores para uma posição futura:-------------------------
+;________________________________________________________________________________
+
     invoke movObj, addr p1 
     invoke movObj, addr p2   
+
+    ;Calcula d2:-----------------------------------------------------------------
+;________________________________________________________________________________
 
     ;Calcula (x2 - x1)^2 e coloca em d2:
     mov ax, p2.x 
@@ -248,14 +258,18 @@ canMov proc p1:gameObj, p2:gameObj ;Atualiza se cada jogador pode se mover:
     invoke mult, ax, ax
     add d2, eax
 
-    ;Checa se os jogadores vão colidir:
+    ;Checa se os jogadores vão colidir:------------------------------------------
+;________________________________________________________________________________
+
     .if d2 < (2 * IMG_SIZE2)
         mov canPlyrsMov.x, 0
         mov canPlyrsMov.y, 0
         ret
     .endif
     
-    ;Checa se cada jogador vai sair da tela:
+    ;Checa se cada jogador vai sair da tela:-------------------------------------
+;________________________________________________________________________________
+
     ;Player1:
     mov canPlyrsMov.x, 0
     .if p1.x <= OFFSETX && p1.x >= HALF_SIZE\
@@ -294,25 +308,33 @@ updateScreen proc hWnd:HWND ;Desenha na tela todos os objetos:
 
     invoke CreateCompatibleDC, hdc 
     mov hMemDC, eax 
-     
+    
+    ;Desenha os jogadores:-------------------------------------------------------
+;________________________________________________________________________________
+
     invoke printPlyr, player1.playerObj, hdc, hMemDC 
     invoke printPlyr, player2.playerObj, hdc, hMemDC
 
     invoke DeleteDC, hMemDC 
-
     invoke EndPaint, hWnd, addr ps 
 
     ret
 updateScreen endp
 
-printPlyr proc plyr:gameObj, _hdc:HDC, _hMemDC:HDC 
+printPlyr proc plyr:gameObj, _hdc:HDC, _hMemDC:HDC ;Desenha na tela um jogador:
+    ;Seleciona qual imagem vai ser desenhada:
     .if plyr.speed.x == 0 ;Caso seja 0:
-        .if plyr.speed.y > 7fh ;Caso seja negativo:
+;________________________________________________________________________________
+        .if plyr.speed.y === 0 ;Caso seja 0:
             invoke SelectObject, _hMemDC, h101 
-        .else ;Caso seja 0:
-            invoke SelectObject, _hMemDC, h100 
+        .elseif plyr.speed.y < 80h ;Caso seja positivo:
+            invoke SelectObject, _hMemDC, h105 
+        .elseif plyr.speed.y > 7fh ;Caso seja negativo:
+            invoke SelectObject, _hMemDC, h101 
         .endif
     .elseif plyr.speed.x < 80h ;Caso seja positivo:
+;________________________________________________________________________________
+
         .if plyr.speed.y == 0 ;Caso seja 0:
             invoke SelectObject, _hMemDC, h103
         .elseif plyr.speed.y < 80h ;Caso seja positivo:
@@ -321,6 +343,8 @@ printPlyr proc plyr:gameObj, _hdc:HDC, _hMemDC:HDC
             invoke SelectObject, _hMemDC, h102 
         .endif
     .else ;Caso seja negativo:
+;________________________________________________________________________________
+
         .if plyr.speed.y == 0 ;Caso seja 0:
             invoke SelectObject, _hMemDC, h107
         .elseif plyr.speed.y < 80h ;Caso seja positivo:
