@@ -410,19 +410,19 @@ updateScreen endp
 
 gameHandler proc p:dword
     .while TRUE
-            invoke canMov, player1.playerObj, player2.playerObj
+        invoke canMov, player1.playerObj, player2.playerObj
 
-            .if canPlyrsMov.x 
-                invoke movObj, addr player1.playerObj
-            .endif
+        .if canPlyrsMov.x 
+            invoke movObj, addr player1.playerObj
+        .endif
 
-            .if canPlyrsMov.y
-                invoke movObj, addr player2.playerObj
-            .endif
+        .if canPlyrsMov.y
+            invoke movObj, addr player2.playerObj
+        .endif
 
-            .if canPlyrsMov.x || canPlyrsMov.y
-                invoke InvalidateRect, hWnd, NULL, TRUE
-            .endif 
+        .if canPlyrsMov.x || canPlyrsMov.y
+            invoke InvalidateRect, hWnd, NULL, TRUE
+        .endif 
     .endw
 
     ret
