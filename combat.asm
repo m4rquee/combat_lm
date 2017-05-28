@@ -6,8 +6,8 @@ include combat.inc
 
 .data
     ;Estruturas dos jogadores:
-    player1 player <MAX_LIFE, 7, <IMG_SIZE, WIN_HT / 2, <-SPEED, 0>>>
-    player2 player <MAX_LIFE, 3, <WIN_WD - IMG_SIZE, WIN_HT / 2, <SPEED, 0>>>
+    player1 player <MAX_LIFE, 7, <IMG_SIZE, WIN_HT / 2, <0, 0>>>
+    player2 player <MAX_LIFE, 3, <WIN_WD - IMG_SIZE, WIN_HT / 2, <0, 0>>>
 
     canPlyrsMov pair <0, 0> ;Indica se cada jogador pode se mover
     isShooting pair <0, 0> ;Indica se cada jogador está atirando
@@ -84,18 +84,17 @@ WinMain proc hInst:HINSTANCE, CmdShow:dword
 
     invoke RegisterClassEx, addr wc ;Register our window class 
 
-    mov Wwd, WIN_WD
-    mov Wht, WIN_HT
-
+    mov Wwd, WIN_WD + 16
+    mov Wht, WIN_HT + 39
     invoke CreateWindowEx, NULL, addr ClassName, addr AppName,\ 
         WS_OVERLAPPED or WS_SYSMENU or WS_MINIMIZEBOX,\ 
         CW_USEDEFAULT, CW_USEDEFAULT,\
         Wwd, Wht,\ 
         NULL, NULL, hInst, NULL 
 
-    mov hwnd, eax 
-    invoke ShowWindow, hwnd, CmdShow ;Display our window on desktop 
-    invoke UpdateWindow, hwnd ;Refresh the client area
+    mov hWnd, eax 
+    invoke ShowWindow, hWnd, CmdShow ;Display our window on desktop 
+    invoke UpdateWindow, hWnd ;Refresh the client area
 
     ;Enter message loop
 	.while TRUE  
@@ -111,7 +110,7 @@ WinMain proc hInst:HINSTANCE, CmdShow:dword
     ret 
 WinMain endp
 
-WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM ;wParam -  
+WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM ;wParam -  
                                                             ;Parametro recebido
                                                             ;do Windows
     .if uMsg == WM_CREATE ;Carrega as imagens e cria a thread principal:---------
@@ -220,8 +219,10 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM ;wParam -
         .endif
 ;________________________________________________________________________________
 
+	.elseif uMsg == WM_PAINT ;Atualizar da página:-------------------------------  
+         invoke updateScreen
     .else ;Default:
-        invoke DefWindowProc, hWnd, uMsg, wParam, lParam ;Default processing 
+        invoke DefWindowProc, _hWnd, uMsg, wParam, lParam ;Default processing 
         ret 
     .endif 
 
@@ -232,10 +233,14 @@ WndProc endp
 
 mult proc n1:word, n2:word ;Multiplica dois números (16 b) e coloca em eax:
     xor eax, eax 
+	xor edx, edx
+
     mov ax, n1
     mov bx, n2
 
     imul bx
+	shl edx, 16
+
     add eax, edx
 
     ret
@@ -304,11 +309,11 @@ canMov proc p1:gameObj, p2:gameObj ;Atualiza se cada jogador pode se mover:
     add d2, eax
 
     ;Checa se os jogadores vão colidir:------------------------------------------
-;________________________________________________________________________________
+;________________________________________________________________________________	
 
-    .if d2 < (2 * IMG_SIZE2)
-        mov canPlyrsMov.x, 0
-        mov canPlyrsMov.y, 0
+    .if d2 < IMG_SIZE2
+        mov canPlyrsMov.x, FALSE
+        mov canPlyrsMov.y, FALSE
         ret
     .endif
     
@@ -316,17 +321,27 @@ canMov proc p1:gameObj, p2:gameObj ;Atualiza se cada jogador pode se mover:
 ;________________________________________________________________________________
 
     ;Player1:
-    mov canPlyrsMov.x, 0
-    .if p1.x <= OFFSETX && p1.x >= HALF_SIZE\
-        && p1.y <= OFFSETY && p1.y >= HALF_SIZE
-        mov canPlyrsMov.x, 1    
+    mov canPlyrsMov.x, FALSE
+    .if p1.x <= OFFSETX 
+        .if p1.x >= HALF_SIZE
+            .if p1.y <= OFFSETY
+                .if p1.y >= HALF_SIZE
+                    mov canPlyrsMov.x, TRUE    
+                .endif
+            .endif
+        .endif
     .endif
 
     ;Player2:
-    mov canPlyrsMov.y, 0
-    .if p2.x <= OFFSETX && p2.x >= HALF_SIZE\
-        && p2.y <= OFFSETY && p2.y >= HALF_SIZE
-        mov canPlyrsMov.y, 1    
+    mov canPlyrsMov.y, FALSE
+    .if p2.x <= OFFSETX 
+        .if p2.x >= HALF_SIZE
+            .if p2.y <= OFFSETY
+                .if p2.y >= HALF_SIZE
+                    mov canPlyrsMov.y, TRUE    
+                .endif
+            .endif
+        .endif
     .endif
 
     ret
@@ -370,7 +385,7 @@ printPlyr proc plyr:player, _hdc:HDC, _hMemDC:HDC ;Desenha na tela um jogador:
     ret
 printPlyr endp
 
-updateScreen proc hWnd:HWND ;Desenha na tela todos os objetos:
+updateScreen proc ;Desenha na tela todos os objetos:
     locaL ps:PAINTSTRUCT
     locaL hMemDC:HDC 
     locaL hdc:HDC 
@@ -384,17 +399,32 @@ updateScreen proc hWnd:HWND ;Desenha na tela todos os objetos:
     ;Desenha os jogadores:-------------------------------------------------------
 ;________________________________________________________________________________
 
-    invoke printPlyr, player1.playerObj, hdc, hMemDC 
-    invoke printPlyr, player2.playerObj, hdc, hMemDC
+    invoke printPlyr, player1, hdc, hMemDC 
+    invoke printPlyr, player2, hdc, hMemDC
 
     invoke DeleteDC, hMemDC 
     invoke EndPaint, hWnd, addr ps 
-
+    
     ret
 updateScreen endp
 
 gameHandler proc p:dword
-    
+    .while TRUE
+            invoke canMov, player1.playerObj, player2.playerObj
+
+            .if canPlyrsMov.x 
+                invoke movObj, addr player1.playerObj
+            .endif
+
+            .if canPlyrsMov.y
+                invoke movObj, addr player2.playerObj
+            .endif
+
+            .if canPlyrsMov.x || canPlyrsMov.y
+                invoke InvalidateRect, hWnd, NULL, TRUE
+            .endif 
+    .endw
+
     ret
 gameHandler endp
     
