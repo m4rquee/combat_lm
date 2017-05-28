@@ -6,8 +6,8 @@ include combat.inc
 
 .data
     ;Estruturas dos jogadores:
-    player1 player <MAX_LIFE, <HALF_SIZE, WIN_HT / 2, <-SPEED, 0>>>
-    player2 player <MAX_LIFE, <WIN_WD - HALF_SIZE, WIN_HT / 2, <SPEED, 0>>>
+    player1 player <MAX_LIFE, <IMG_SIZE, WIN_HT / 2, <-SPEED, 0>>>
+    player2 player <MAX_LIFE, <WIN_WD - IMG_SIZE, WIN_HT / 2, <SPEED, 0>>>
 
     canPlyrsMov pair <0, 0> ;Indica se cada jogador pode se mover
     isShooting pair <0, 0> ;Indica se cada jogador está atirando
@@ -77,16 +77,6 @@ WinMain proc hInst:HINSTANCE, CmdShow:dword
 
         invoke TranslateMessage, addr msg 
         invoke DispatchMessage, addr msg
-
-        ;invoke canMov, player1.playerObj, player2.playerObj
-
-        ;.if canPlyrsMov.x
-		  ;invoke movObj, addr player1.playerObj
-        ;.endif
-
-        ;.if canPlyrsMov.y
-          ;invoke movObj, addr player2.playerObj
-        ;.endif
 	.endw 
 
     mov eax, msg.wParam ;Return exit code in eax 
@@ -94,13 +84,16 @@ WinMain proc hInst:HINSTANCE, CmdShow:dword
     ret 
 WinMain endp
 
-WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM ;wParam - Parametro recebido 
-                                                                ;do Windows
+WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM ;wParam -  
+                                                            ;Parametro recebido
+                                                            ;do Windows
     .if uMsg == WM_CREATE 
         invoke loadBitmaps
     .elseif uMsg == WM_DESTROY ;If the user closes the window  
         invoke PostQuitMessage, NULL ;Quit the application 
-    .elseif uMsg == WM_CHAR ;Keydown printable:
+    .elseif uMsg == WM_CHAR ;Keydown printable:----------------------------------
+;________________________________________________________________________________
+
         ;Teclas de movimento player1:
         .if (wParam == 77h) ;w
             mov player1.playerObj.speed.y, -SPEED 
@@ -110,16 +103,21 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM ;wParam - Parame
             mov player1.playerObj.speed.y, SPEED
         .elseif (wParam == 64h) ;d
             mov player1.playerObj.speed.x, SPEED
+;________________________________________________________________________________
 
         .elseif (wParam == 79h) ;y - Tiro player1:
             mov isShooting.x, TRUE
         .elseif (wParam == 75h) ;u - Especial player1:
+;________________________________________________________________________________
+
         .elseif (wParam == 32h) ;2 - Tiro player2:
             mov isShooting.y, TRUE
         .elseif (wParam == 33h) ;3 - Especial player2:
         .endif
 
-    .elseif uMsg == WM_DEADCHAR ;Keyup printable:
+    .elseif uMsg == WM_DEADCHAR ;Keyup printable:--------------------------------
+;________________________________________________________________________________
+
         ;Teclas de movimento player1:
         .if (wParam == 77h) ;w
             .if (player1.playerObj.speed.y > 7fh) ;Caso seja negativo:
@@ -130,23 +128,28 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM ;wParam - Parame
                 mov player1.playerObj.speed.x, 0 
             .endif
         .elseif (wParam == 73h) ;s
-            .if (player1.playerObj.speed.y < 80h)
+            .if (player1.playerObj.speed.y < 80h) ;Caso seja positivo:
                 mov player1.playerObj.speed.y, 0 
             .endif
         .elseif (wParam == 64h) ;d
-            .if (player1.playerObj.speed.x < 80h)
+            .if (player1.playerObj.speed.x < 80h) ;Caso seja positivo:
                 mov player1.playerObj.speed.x, 0 
             .endif
+;________________________________________________________________________________
 
         .elseif (wParam == 79h) ;y - Tiro player1:
             mov isShooting.x, FALSE
         .elseif (wParam == 75h) ;u - Especial player1:
+;________________________________________________________________________________
+
         .elseif (wParam == 32h) ;2 - Tiro player2:
             mov isShooting.y, FALSE
         .elseif (wParam == 33h) ;3 - Especial player2:
         .endif
 
-    .elseif uMsg == WM_KEYDOWN ;Keydown nonprintable:
+    .elseif uMsg == WM_KEYDOWN ;Keydown nonprintable:----------------------------
+;________________________________________________________________________________
+
         ;Teclas de movimento player2:
         .if (wParam == VK_UP) ;seta cima
             mov player2.playerObj.speed.y, -SPEED
@@ -158,14 +161,16 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM ;wParam - Parame
             mov player2.playerObj.speed.x, SPEED
         .endif
 
-    .elseif uMsg == WM_KEYUP ;Keyup nonprintable:
+    .elseif uMsg == WM_KEYUP ;Keyup nonprintable:--------------------------------
+;________________________________________________________________________________
+
         ;Teclas de movimento player2:
         .if (wParam == VK_UP) ;seta cima
             .if (player2.playerObj.speed.y > 7fh) ;Caso seja negativo:
                 mov player2.playerObj.speed.y, 0 
             .endif
         .elseif (wParam == VK_DOWN) ;seta baixo
-            .if (player2.playerObj.speed.y < 80h)
+            .if (player2.playerObj.speed.y < 80h) ;Caso seja positivo:
                 mov player2.playerObj.speed.y, 0 
             .endif
         .elseif (wParam == VK_LEFT) ;seta esquerda
@@ -173,12 +178,13 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM ;wParam - Parame
                 mov player2.playerObj.speed.x, 0 
             .endif
         .elseif (wParam == VK_RIGHT) ;seta direita
-            .if (player2.playerObj.speed.x < 80h)
+            .if (player2.playerObj.speed.x < 80h) ;Caso seja positivo:
                 mov player2.playerObj.speed.x, 0 
             .endif
         .endif
+;________________________________________________________________________________
 
-    .elseif uMsg == WM_PAINT ;Atualizar da página:  
+    .elseif uMsg == WM_PAINT ;Atualizar da página:-------------------------------  
         invoke updateScreen, hWnd
     .else ;Default:
         invoke DefWindowProc, hWnd, uMsg, wParam, lParam ;Default processing 
@@ -190,7 +196,8 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM ;wParam - Parame
     ret 
 WndProc endp
 
-movObj proc addrObj:dword ;Atualiza a posição de um gameObj:
+movObj proc addrObj:dword ;Atualiza a posição de um gameObj de acordo com sua
+                        ;velocidade:
 	assume ecx:ptr gameObj
     mov ecx, addrObj
     
@@ -223,26 +230,26 @@ movObj endp
 
 canMov proc p1:gameObj, p2:gameObj ;Atualiza se cada jogador pode se mover:
     local d2:dword ;Quadrado da distância entre os jogadores
-                   ;d^2=(x2-x1)^2 + (y2-y1)^2
+                   ;d^2 = (x2 - x1)^2 + (y2 - y1)^2
 
-    ;Move uma cópia dos jogadores para uma posição futura:
+    ;Move a cópia dos jogadores para uma posição futura:
     invoke movObj, addr p1 
     invoke movObj, addr p2   
 
-    ;Calcula (x2-x1)^2 e coloca em d2:
+    ;Calcula (x2 - x1)^2 e coloca em d2:
     mov ax, p2.x 
     sub ax, p1.x
     invoke mult, ax, ax
     mov d2, eax
 
-    ;Calcula (y2-y1)^2 e soma em d2:
+    ;Calcula (y2 - y1)^2 e soma em d2:
     mov ax, p2.y 
     sub ax, p1.y
     invoke mult, ax, ax
     add d2, eax
 
     ;Checa se os jogadores vão colidir:
-    .if d2 < IMG_SIZE2
+    .if d2 < (2 * IMG_SIZE2)
         mov canPlyrsMov.x, 0
         mov canPlyrsMov.y, 0
         ret
@@ -251,15 +258,15 @@ canMov proc p1:gameObj, p2:gameObj ;Atualiza se cada jogador pode se mover:
     ;Checa se cada jogador vai sair da tela:
     ;Player1:
     mov canPlyrsMov.x, 0
-    .if p1.x > OFFSETX && p1.x < IMG_SIZE\
-        && p1.y > OFFSETY && p1.y < IMG_SIZE
+    .if p1.x <= OFFSETX && p1.x >= HALF_SIZE\
+        && p1.y <= OFFSETY && p1.y >= HALF_SIZE
         mov canPlyrsMov.x, 1    
     .endif
 
     ;Player2:
     mov canPlyrsMov.y, 0
-    .if p2.x > OFFSETX && p2.x < IMG_SIZE\
-        && p2.y > OFFSETY && p2.y < IMG_SIZE
+    .if p2.x <= OFFSETX && p2.x >= HALF_SIZE\
+        && p2.y <= OFFSETY && p2.y >= HALF_SIZE
         mov canPlyrsMov.y, 1    
     .endif
 
@@ -359,8 +366,9 @@ loadBitmaps proc ;Carrega os bitmaps do jogo:
 
     invoke LoadBitmap, hInstance, 107
     mov h107, eax
-    loadBitmaps endp
 
     ret
+loadBitmaps endp
+    
 end start
 

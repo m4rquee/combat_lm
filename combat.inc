@@ -18,19 +18,19 @@ includelib C:\masm32\lib\shell32.lib
 ;=================
 ; structs
 ;=================
-pair struct ;Par ordenado:
+pair struct ;Par ordenado (<a, b>): 
     x  db ?
     y  db ?
 pair ends
 
-gameObj struct ;Objeto primário:
+gameObj struct ;Objeto primário (<x, y, <Vx, Vy>>):
 	x  dw ?
     y  dw ?
     
 	speed pair <>
 gameObj ends
 
-player struct ;Dados de um jogador:
+player struct ;Dados de um jogador (<Life, <x, y, <Vx, Vy>>>):
     life db ?
     playerObj gameObj <>
 player ends
@@ -42,11 +42,11 @@ player ends
 	WIN_WD equ 1500 ;Largura da janela
 	WIN_HT equ 1000 ;Altura da janela
 
-    OFFSETX equ WIN_WD - IMG_SIZE
-    OFFSETY equ WIN_HT - IMG_SIZE
+    OFFSETX equ WIN_WD - HALF_SIZE
+    OFFSETY equ WIN_HT - HALF_SIZE
 
     IMG_SIZE equ 32 ;Altura e largura da img do jogador
-    IMG_SIZE2 equ IMG_SIZE * IMG_SIZE ;Altura * largura
+    IMG_SIZE2 equ IMG_SIZE * IMG_SIZE ;Quadrado de IMG_SIZE
     HALF_SIZE equ IMG_SIZE / 2 
 
     SPEED equ 1 ;Velocidade dos jogadores
