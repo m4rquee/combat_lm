@@ -6,8 +6,8 @@ include combat.inc
 
 .data
     ;Estruturas dos jogadores:
-    player1 player <MAX_LIFE, <IMG_SIZE, WIN_HT / 2, <-SPEED, 0>>>
-    player2 player <MAX_LIFE, <WIN_WD - IMG_SIZE, WIN_HT / 2, <SPEED, 0>>>
+    player1 player <MAX_LIFE, 7, <IMG_SIZE, WIN_HT / 2, <-SPEED, 0>>>
+    player2 player <MAX_LIFE, 3, <WIN_WD - IMG_SIZE, WIN_HT / 2, <SPEED, 0>>>
 
     canPlyrsMov pair <0, 0> ;Indica se cada jogador pode se mover
     isShooting pair <0, 0> ;Indica se cada jogador está atirando
@@ -57,7 +57,6 @@ loadBitmaps endp
 WinMain proc hInst:HINSTANCE, CmdShow:dword
 	local wc:WNDCLASSEX                                            
     local msg:MSG 
-    local hwnd:HWND
 
     local Wwd:dword
     local Wht:dword
@@ -115,8 +114,17 @@ WinMain endp
 WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM ;wParam -  
                                                             ;Parametro recebido
                                                             ;do Windows
-    .if uMsg == WM_CREATE 
+    .if uMsg == WM_CREATE ;Carrega as imagens e cria a thread principal:---------
+;________________________________________________________________________________
+
         invoke loadBitmaps
+
+        mov eax, offset gameHandler 
+        invoke CreateThread, NULL, NULL, eax, 0, 0, addr threadID 
+
+        invoke CloseHandle, eax 
+;________________________________________________________________________________
+
     .elseif uMsg == WM_DESTROY ;If the user closes the window  
         invoke PostQuitMessage, NULL ;Quit the application 
     .elseif uMsg == WM_CHAR ;Keydown printable:----------------------------------
@@ -324,47 +332,40 @@ canMov proc p1:gameObj, p2:gameObj ;Atualiza se cada jogador pode se mover:
     ret
 canMov endp
 
-printPlyr proc plyr:gameObj, _hdc:HDC, _hMemDC:HDC ;Desenha na tela um jogador:
+printPlyr proc plyr:player, _hdc:HDC, _hMemDC:HDC ;Desenha na tela um jogador:
     ;Seleciona qual imagem vai ser desenhada:
-    .if plyr.speed.x == 0 ;Caso seja 0:
-;________________________________________________________________________________
-        .if plyr.speed.y == 0 ;Caso seja 0:
-            invoke SelectObject, _hMemDC, h101 
-        .elseif plyr.speed.y < 80h ;Caso seja positivo:
-            invoke SelectObject, _hMemDC, h105 
-        .elseif plyr.speed.y > 7fh ;Caso seja negativo:
-            invoke SelectObject, _hMemDC, h101 
-        .endif
-    .elseif plyr.speed.x < 80h ;Caso seja positivo:
 ;________________________________________________________________________________
 
-        .if plyr.speed.y == 0 ;Caso seja 0:
-            invoke SelectObject, _hMemDC, h103
-        .elseif plyr.speed.y < 80h ;Caso seja positivo:
-            invoke SelectObject, _hMemDC, h104 
-        .elseif plyr.speed.y > 7fh ;Caso seja negativo:
-            invoke SelectObject, _hMemDC, h102 
-        .endif
-    .else ;Caso seja negativo:
-;________________________________________________________________________________
-
-        .if plyr.speed.y == 0 ;Caso seja 0:
-            invoke SelectObject, _hMemDC, h107
-        .elseif plyr.speed.y < 80h ;Caso seja positivo:
-            invoke SelectObject, _hMemDC, h106 
-        .elseif plyr.speed.y > 7fh ;Caso seja negativo:
-            invoke SelectObject, _hMemDC, h100 
-        .endif
+    .if plyr.direc == 0
+        invoke SelectObject, _hMemDC, h100
+    .elseif plyr.direc == 1
+        invoke SelectObject, _hMemDC, h101
+    .elseif plyr.direc == 2
+        invoke SelectObject, _hMemDC, h102
+    .elseif plyr.direc == 3
+        invoke SelectObject, _hMemDC, h103
+    .elseif plyr.direc == 4
+        invoke SelectObject, _hMemDC, h104
+    .elseif plyr.direc == 5
+        invoke SelectObject, _hMemDC, h105
+    .elseif plyr.direc == 6
+        invoke SelectObject, _hMemDC, h106
+    .else
+        invoke SelectObject, _hMemDC, h107
     .endif
-    
-    movzx eax, plyr.x
-    movzx ebx, plyr.y
+
+    ;Calcula as coordenadas do ponto superior esquerdo:
+;________________________________________________________________________________
+
+    movzx eax, plyr.playerObj.x
+    movzx ebx, plyr.playerObj.y
     sub eax, HALF_SIZE
     sub ebx, HALF_SIZE
+;________________________________________________________________________________
 
     invoke BitBlt, _hdc, eax, ebx,\
-        IMG_SIZE, IMG_SIZE,\
-        _hMemDC, 0, 0, SRCCOPY
+        IMG_SIZE, IMG_SIZE, _hMemDC,\ 
+        0, 0, SRCCOPY
 
     ret
 printPlyr endp
@@ -393,6 +394,8 @@ updateScreen proc hWnd:HWND ;Desenha na tela todos os objetos:
 updateScreen endp
 
 gameHandler proc p:dword
+    
+    ret
 gameHandler endp
     
 end start
