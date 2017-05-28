@@ -78,13 +78,16 @@ hInstance HINSTANCE ?
 ; prototypes
 ;=================
 WinMain proto :DWORD, :DWORD   
+
 loadBitmaps proto ;Carrega os bitmaps do jogo
 
-printPlyr proto :gameObj, :HDC, :HDC  ;Desenha o jogador indicado (0 ou 1)
+gameHandler proto :DWORD ;Thread principal do jogo
+
+printPlyr proto :gameObj, :HDC, :HDC ;Desenha o jogador passado
 updateScreen proto :HWND ;Desenha na tela todos os objetos
 
 canMov proto :gameObj, :gameObj ;Atualiza se cada jogador pode se mover
 mult proto :WORD, :WORD ;Multiplica dois números (16 b) e coloca em eax
-movObj proto :DWORD ;Atualiza a posição de um gameObj
+movObj proto :DWORD ;Atualiza a posição do gameObj passado
 
 

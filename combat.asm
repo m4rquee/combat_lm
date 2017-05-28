@@ -26,6 +26,34 @@ mov hInstance, eax
 invoke WinMain, hInstance, SW_SHOWDEFAULT
 invoke ExitProcess, eax
 
+loadBitmaps proc ;Carrega os bitmaps do jogo:
+    invoke LoadBitmap, hInstance, 100
+    mov h100, eax
+
+    invoke LoadBitmap, hInstance, 101
+    mov h101, eax
+
+    invoke LoadBitmap, hInstance, 102
+    mov h102, eax
+
+    invoke LoadBitmap, hInstance, 103
+    mov h103, eax
+
+    invoke LoadBitmap, hInstance, 104
+    mov h104, eax
+
+    invoke LoadBitmap, hInstance, 105
+    mov h105, eax
+
+    invoke LoadBitmap, hInstance, 106
+    mov h106, eax
+
+    invoke LoadBitmap, hInstance, 107
+    mov h107, eax
+
+    ret
+loadBitmaps endp
+
 WinMain proc hInst:HINSTANCE, CmdShow:dword
 	local wc:WNDCLASSEX                                            
     local msg:MSG 
@@ -184,8 +212,6 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM ;wParam -
         .endif
 ;________________________________________________________________________________
 
-    .elseif uMsg == WM_PAINT ;Atualizar da página:-------------------------------  
-        invoke updateScreen, hWnd
     .else ;Default:
         invoke DefWindowProc, hWnd, uMsg, wParam, lParam ;Default processing 
         ret 
@@ -195,6 +221,17 @@ WndProc proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM ;wParam -
 
     ret 
 WndProc endp
+
+mult proc n1:word, n2:word ;Multiplica dois números (16 b) e coloca em eax:
+    xor eax, eax 
+    mov ax, n1
+    mov bx, n2
+
+    imul bx
+    add eax, edx
+
+    ret
+mult endp
 
 movObj proc addrObj:dword ;Atualiza a posição de um gameObj de acordo com sua
                         ;velocidade:
@@ -287,45 +324,11 @@ canMov proc p1:gameObj, p2:gameObj ;Atualiza se cada jogador pode se mover:
     ret
 canMov endp
 
-mult proc n1:word, n2:word ;Multiplica dois números (16 b) e coloca em eax:
-	xor eax, eax 
-    mov ax, n1
-    mov bx, n2
-
-    imul bx
-    add eax, edx
-
-    ret
-mult endp
-
-updateScreen proc hWnd:HWND ;Desenha na tela todos os objetos:
-    locaL ps:PAINTSTRUCT
-    locaL hMemDC:HDC 
-    locaL hdc:HDC 
-
-    invoke BeginPaint, hWnd, addr ps 
-    mov hdc, eax 
-
-    invoke CreateCompatibleDC, hdc 
-    mov hMemDC, eax 
-    
-    ;Desenha os jogadores:-------------------------------------------------------
-;________________________________________________________________________________
-
-    invoke printPlyr, player1.playerObj, hdc, hMemDC 
-    invoke printPlyr, player2.playerObj, hdc, hMemDC
-
-    invoke DeleteDC, hMemDC 
-    invoke EndPaint, hWnd, addr ps 
-
-    ret
-updateScreen endp
-
 printPlyr proc plyr:gameObj, _hdc:HDC, _hMemDC:HDC ;Desenha na tela um jogador:
     ;Seleciona qual imagem vai ser desenhada:
     .if plyr.speed.x == 0 ;Caso seja 0:
 ;________________________________________________________________________________
-        .if plyr.speed.y === 0 ;Caso seja 0:
+        .if plyr.speed.y == 0 ;Caso seja 0:
             invoke SelectObject, _hMemDC, h101 
         .elseif plyr.speed.y < 80h ;Caso seja positivo:
             invoke SelectObject, _hMemDC, h105 
@@ -354,10 +357,10 @@ printPlyr proc plyr:gameObj, _hdc:HDC, _hMemDC:HDC ;Desenha na tela um jogador:
         .endif
     .endif
     
-	movzx eax, plyr.x
-	movzx ebx, plyr.y
-	sub eax, HALF_SIZE
-	sub ebx, HALF_SIZE
+    movzx eax, plyr.x
+    movzx ebx, plyr.y
+    sub eax, HALF_SIZE
+    sub ebx, HALF_SIZE
 
     invoke BitBlt, _hdc, eax, ebx,\
         IMG_SIZE, IMG_SIZE,\
@@ -366,33 +369,31 @@ printPlyr proc plyr:gameObj, _hdc:HDC, _hMemDC:HDC ;Desenha na tela um jogador:
     ret
 printPlyr endp
 
-loadBitmaps proc ;Carrega os bitmaps do jogo:
-    invoke LoadBitmap, hInstance, 100
-    mov h100, eax
+updateScreen proc hWnd:HWND ;Desenha na tela todos os objetos:
+    locaL ps:PAINTSTRUCT
+    locaL hMemDC:HDC 
+    locaL hdc:HDC 
 
-    invoke LoadBitmap, hInstance, 101
-    mov h101, eax
+    invoke BeginPaint, hWnd, addr ps 
+    mov hdc, eax 
 
-    invoke LoadBitmap, hInstance, 102
-    mov h102, eax
+    invoke CreateCompatibleDC, hdc 
+    mov hMemDC, eax 
+    
+    ;Desenha os jogadores:-------------------------------------------------------
+;________________________________________________________________________________
 
-    invoke LoadBitmap, hInstance, 103
-    mov h103, eax
+    invoke printPlyr, player1.playerObj, hdc, hMemDC 
+    invoke printPlyr, player2.playerObj, hdc, hMemDC
 
-    invoke LoadBitmap, hInstance, 104
-    mov h104, eax
-
-    invoke LoadBitmap, hInstance, 105
-    mov h105, eax
-
-    invoke LoadBitmap, hInstance, 106
-    mov h106, eax
-
-    invoke LoadBitmap, hInstance, 107
-    mov h107, eax
+    invoke DeleteDC, hMemDC 
+    invoke EndPaint, hWnd, addr ps 
 
     ret
-loadBitmaps endp
+updateScreen endp
+
+gameHandler proc p:dword
+gameHandler endp
     
 end start
 
