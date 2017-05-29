@@ -93,6 +93,7 @@ printPlyr proto :player, :HDC, :HDC ;Desenha o jogador passado
 
 movObj proto :DWORD ;Atualiza a posição do gameObj passado
 mult proto :WORD, :WORD ;Multiplica dois números (16 b) e coloca em eax
+updateDirec proto :DWORD ;Atualiza a direção de um jogador
 canMov proto :gameObj, :gameObj ;Atualiza se cada jogador pode se mover
 
 

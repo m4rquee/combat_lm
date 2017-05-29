@@ -108,6 +108,11 @@ WinMain proc hInst:HINSTANCE, CmdShow:dword
         invoke GetMessage, addr msg, NULL, 0, 0 
         .break .if (!eax) 
 
+		mov eax, msg.message
+		.if eax == WM_KEYUP
+			mov eax, 0
+		.endif		
+
         invoke TranslateMessage, addr msg 
         invoke DispatchMessage, addr msg
 	.endw 
@@ -156,39 +161,8 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM ;wParam -
             mov isShooting.y, TRUE
         .elseif (wParam == 33h) ;3 - Especial player2:
         .endif
-
-    .elseif uMsg == WM_DEADCHAR ;Keyup printable:--------------------------------
 ;________________________________________________________________________________
-
-        ;Teclas de movimento player1:
-        .if (wParam == 77h) ;w
-            .if (player1.playerObj.speed.y > 7fh) ;Caso seja negativo:
-                mov player1.playerObj.speed.y, 0 
-            .endif
-        .elseif (wParam == 61h) ;a
-            .if (player1.playerObj.speed.x > 7fh) ;Caso seja negativo:
-                mov player1.playerObj.speed.x, 0 
-            .endif
-        .elseif (wParam == 73h) ;s
-            .if (player1.playerObj.speed.y < 80h) ;Caso seja positivo:
-                mov player1.playerObj.speed.y, 0 
-            .endif
-        .elseif (wParam == 64h) ;d
-            .if (player1.playerObj.speed.x < 80h) ;Caso seja positivo:
-                mov player1.playerObj.speed.x, 0 
-            .endif
-;________________________________________________________________________________
-
-        .elseif (wParam == 79h) ;y - Tiro player1:
-            mov isShooting.x, FALSE
-        .elseif (wParam == 75h) ;u - Especial player1:
-;________________________________________________________________________________
-
-        .elseif (wParam == 32h) ;2 - Tiro player2:
-            mov isShooting.y, FALSE
-        .elseif (wParam == 33h) ;3 - Especial player2:
-        .endif
-
+        
     .elseif uMsg == WM_KEYDOWN ;Keydown nonprintable:----------------------------
 ;________________________________________________________________________________
 
@@ -202,12 +176,42 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM ;wParam -
         .elseif (wParam == VK_RIGHT) ;seta direita
             mov player2.playerObj.speed.x, SPEED
         .endif
-
-    .elseif uMsg == WM_KEYUP ;Keyup nonprintable:--------------------------------
 ;________________________________________________________________________________
 
+    .elseif uMsg == WM_KEYUP ;Keyup:---------------------------------------------
+;________________________________________________________________________________
+
+        ;Teclas de movimento player1:
+        .if (wParam == 57h) ;w
+            .if (player1.playerObj.speed.y > 7fh) ;Caso seja negativo:
+                mov player1.playerObj.speed.y, 0 
+            .endif
+        .elseif (wParam == 41h) ;a
+            .if (player1.playerObj.speed.x > 7fh) ;Caso seja negativo:
+                mov player1.playerObj.speed.x, 0 
+            .endif
+        .elseif (wParam == 53h) ;s
+            .if (player1.playerObj.speed.y < 80h) ;Caso seja positivo:
+                mov player1.playerObj.speed.y, 0 
+            .endif
+        .elseif (wParam == 44h) ;d
+            .if (player1.playerObj.speed.x < 80h) ;Caso seja positivo:
+                mov player1.playerObj.speed.x, 0 
+            .endif
+;________________________________________________________________________________
+
+        .elseif (wParam == 79h) ;y - Tiro player1:
+            mov isShooting.x, FALSE
+        .elseif (wParam == 75h) ;u - Especial player1:
+;________________________________________________________________________________
+
+        .elseif (wParam == 32h) ;2 - Tiro player2:
+            mov isShooting.y, FALSE
+        .elseif (wParam == 33h) ;3 - Especial player2:
+;________________________________________________________________________________
+        
         ;Teclas de movimento player2:
-        .if (wParam == VK_UP) ;seta cima
+        .elseif (wParam == VK_UP) ;seta cima
             .if (player2.playerObj.speed.y > 7fh) ;Caso seja negativo:
                 mov player2.playerObj.speed.y, 0 
             .endif
@@ -329,26 +333,16 @@ canMov proc p1:gameObj, p2:gameObj ;Atualiza se cada jogador pode se mover:
 
     ;Player1:
     mov canPlyrsMov.x, FALSE
-    .if p1.x <= OFFSETX 
-        .if p1.x >= HALF_SIZE
-            .if p1.y <= OFFSETY
-                .if p1.y >= HALF_SIZE
-                    mov canPlyrsMov.x, TRUE    
-                .endif
-            .endif
-        .endif
+    .if p1.x <= OFFSETX && p1.x >= HALF_SIZE &&\
+        p1.y <= OFFSETY && p1.y >= HALF_SIZE
+        mov canPlyrsMov.x, TRUE    
     .endif
 
     ;Player2:
     mov canPlyrsMov.y, FALSE
-    .if p2.x <= OFFSETX 
-        .if p2.x >= HALF_SIZE
-            .if p2.y <= OFFSETY
-                .if p2.y >= HALF_SIZE
-                    mov canPlyrsMov.y, TRUE    
-                .endif
-            .endif
-        .endif
+    .if p2.x <= OFFSETX && p2.x >= HALF_SIZE &&\
+        p2.y <= OFFSETY && p2.y >= HALF_SIZE
+        mov canPlyrsMov.y, TRUE    
     .endif
 
     ret
@@ -428,6 +422,9 @@ gameHandler proc p:dword
             invoke movObj, addr player2.playerObj
         .endif
 
+        invoke updateDirec, addr player1
+        invoke updateDirec, addr player2
+
         .if canPlyrsMov.x || canPlyrsMov.y
             invoke InvalidateRect, hWnd, NULL, TRUE
         .endif 
@@ -435,6 +432,44 @@ gameHandler proc p:dword
 
     ret
 gameHandler endp
+
+updateDirec proc addrPlyr:dword
+    assume eax:ptr player
+    mov eax, addrPlyr
+
+    mov bh, [eax].playerObj.speed.x
+    mov bl, [eax].playerObj.speed.y
+
+    .if bh != 0 || bl != 0
+        .if bh == 0 ;Caso seja zero:
+            .if bl > 7fh ;Caso seja negativo:
+                mov [eax].direc, 1   
+            .else ;Caso seja positivo:
+                mov [eax].direc, 5  
+            .endif 
+        .elseif bh > 7fh ;Caso seja negativo:
+            .if bl == 0 ;Caso seja zero:
+                mov [eax].direc, 7  
+            .elseif bl > 7fh ;Caso seja negativo:
+                mov [eax].direc, 0   
+            .else ;Caso seja positivo:
+                mov [eax].direc, 6  
+            .endif    
+        .else ;Caso seja positivo:
+            .if bl == 0 ;Caso seja zero:
+                mov [eax].direc, 3  
+            .elseif bl > 7fh ;Caso seja negativo:
+                mov [eax].direc, 2   
+            .else ;Caso seja positivo:
+                mov [eax].direc, 4  
+            .endif 
+        .endif
+    .endif
+
+    assume eax:nothing
+
+    ret
+updateDirec endp
     
 end start
 
