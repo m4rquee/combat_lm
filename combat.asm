@@ -55,11 +55,9 @@ loadBitmaps proc ;Carrega os bitmaps do jogo:
 loadBitmaps endp
 
 WinMain proc hInst:HINSTANCE, CmdShow:dword
-	local wc:WNDCLASSEX                                            
+    local clientRect:RECT
+    local wc:WNDCLASSEX                                            
     local msg:MSG 
-
-    local Wwd:dword
-    local Wht:dword
 
 	;Fill values in members of wc
     mov wc.cbSize, SIZEOF WNDCLASSEX  
@@ -84,13 +82,22 @@ WinMain proc hInst:HINSTANCE, CmdShow:dword
 
     invoke RegisterClassEx, addr wc ;Register our window class 
 
-    mov Wwd, WIN_WD + 16
-    mov Wht, WIN_HT + 39
+    mov clientRect.left, 0
+    mov clientRect.top, 0
+    mov clientRect.right, WIN_WD
+    mov clientRect.bottom, WIN_HT
+
+    invoke AdjustWindowRect, addr clientRect, WS_CAPTION, FALSE
+
+    mov eax, clientRect.right
+    sub eax, clientRect.left
+    mov ebx, clientRect.bottom
+    sub ebx, clientRect.top
+
     invoke CreateWindowEx, NULL, addr ClassName, addr AppName,\ 
         WS_OVERLAPPED or WS_SYSMENU or WS_MINIMIZEBOX,\ 
         CW_USEDEFAULT, CW_USEDEFAULT,\
-        Wwd, Wht,\ 
-        NULL, NULL, hInst, NULL 
+        eax, ebx, NULL, NULL, hInst, NULL 
 
     mov hWnd, eax 
     invoke ShowWindow, hWnd, CmdShow ;Display our window on desktop 
@@ -410,6 +417,7 @@ updateScreen endp
 
 gameHandler proc p:dword
     .while TRUE
+        invoke  Sleep, 75
         invoke canMov, player1.playerObj, player2.playerObj
 
         .if canPlyrsMov.x 

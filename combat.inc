@@ -41,8 +41,8 @@ player ends
 ; consts
 ;=================
 .const
-	WIN_WD equ 1500 ;Largura da janela
-	WIN_HT equ 1000 ;Altura da janela
+	WIN_WD equ 1000 ;Largura da janela
+	WIN_HT equ 500 ;Altura da janela
 
     OFFSETX equ WIN_WD - HALF_SIZE
     OFFSETY equ WIN_HT - HALF_SIZE
@@ -51,7 +51,7 @@ player ends
     IMG_SIZE2 equ IMG_SIZE * IMG_SIZE ;Quadrado de IMG_SIZE
     HALF_SIZE equ IMG_SIZE / 2 
 
-    SPEED equ 1 ;Velocidade dos jogadores
+    SPEED equ 5 ;Velocidade dos jogadores
 	MAX_SCORE equ 5 ;Score máximo para o termino do jogo
     MAX_LIFE equ 100 ;Vida inicial dos jogadores
     TRACKED_SHOTS equ 15 ;Número máximo de tiros na tela, 
