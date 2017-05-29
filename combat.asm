@@ -106,12 +106,7 @@ WinMain proc hInst:HINSTANCE, CmdShow:dword
     ;Enter message loop
 	.while TRUE  
         invoke GetMessage, addr msg, NULL, 0, 0 
-        .break .if (!eax) 
-
-		mov eax, msg.message
-		.if eax == WM_KEYUP
-			mov eax, 0
-		.endif		
+        .break .if (!eax) 		
 
         invoke TranslateMessage, addr msg 
         invoke DispatchMessage, addr msg
