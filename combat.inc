@@ -37,6 +37,11 @@ player struct ;Dados de um jogador (<Life, <x, y, <Vx, Vy>>>):
     playerObj gameObj <>
 player ends
 
+node struct ;Nó de uma lista ligada
+    dado gameObj <>
+    next dd ?
+node ends
+
 ;=================
 ; consts
 ;=================
@@ -60,11 +65,11 @@ player ends
 ;=================
 ; data
 ;=================
-.data                   		
+.data      
 AppName db "Combat", 0 ;Título da janela
-ClassName db "CombatClass", 0 
-SuccessString db "The calculation is completed!", 0
+ClassName db "CombatClass", 0 ;Classe da janela
 
+;Bitmaps do jogo:
 h100 dd 0
 h101 dd 0
 h102 dd 0
@@ -95,5 +100,30 @@ movObj proto :DWORD ;Atualiza a posição do gameObj passado
 mult proto :WORD, :WORD ;Multiplica dois números (16 b) e coloca em eax
 updateDirec proto :DWORD ;Atualiza a direção de um jogador
 canMov proto :gameObj, :gameObj ;Atualiza se cada jogador pode se mover
+
+;Métodos de lista ligada:
+addNode proto :DWORD, :DWORD, :DWORD, :node ;Adiciona um nó no final de uma lista
+                                        ;(primeiro nó, último nó, tamanho da 
+                                        ;lista, novo nó)
+
+removeF proto :DWORD, :DWORD, :DWORD, :node ;Remove um nó do começo de uma lista
+                                        ;(primeiro nó, último nó, tamanho da 
+                                        ;lista)
+
+addNode proc firstN:dword, lastN:dword, lSize:dword, newN:node
+    
+    ret
+addNode endp
+
+removeF proc firstN:dword, lastN:dword, lSize:dword, newN:node
+    
+    ret
+removeF endp
+
+
+
+
+
+
 
 

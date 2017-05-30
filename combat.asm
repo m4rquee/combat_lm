@@ -13,13 +13,19 @@ include combat.inc
     isShooting pair <0, 0> ;Indica se cada jogador está atirando
     score pair <0, 0> ;Score de cada jogador
 
-    ;Lista de tiros de cada jogador:
-    shots1 gameObj TRACKED_SHOTS dup (<?, ?, <0, 0>>)  
-    shots2 gameObj TRACKED_SHOTS dup (<?, ?, <0, 0>>)
+    ;Listas ligada de tiros:
+    ;Player1:
+    fShot1 node <> ;Primeiro nó
+    lShot1 node <> ;Último nó
+    numShots1 db 0 ;Número de nós
+
+    ;Player2:
+    fShot2 node <> ;Primeiro nó
+    lShot2 node <> ;Último nó
+    numShots2 db 0 ;Número de nós
 
 .code 
 start:
-
 invoke GetModuleHandle, NULL
 mov hInstance, eax
 
@@ -465,6 +471,6 @@ updateDirec proc addrPlyr:dword
 
     ret
 updateDirec endp
-    
+
 end start
 
