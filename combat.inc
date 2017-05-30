@@ -38,8 +38,8 @@ player struct ;Dados de um jogador (<Life, <x, y, <Vx, Vy>>>):
 player ends
 
 node struct ;Nó de uma lista ligada
-    dado gameObj <>
     next dd ?
+    value gameObj <>
 node ends
 
 ;=================
@@ -102,23 +102,13 @@ updateDirec proto :DWORD ;Atualiza a direção de um jogador
 canMov proto :gameObj, :gameObj ;Atualiza se cada jogador pode se mover
 
 ;Métodos de lista ligada:
-addNode proto :DWORD, :DWORD, :DWORD, :node ;Adiciona um nó no final de uma lista
+addNode proto :DWORD, :DWORD, :DWORD, :gameObj ;Adiciona um nó no final de uma lista
                                         ;(primeiro nó, último nó, tamanho da 
-                                        ;lista, novo nó)
+                                        ;lista, novo dado)
 
 removeF proto :DWORD, :DWORD, :DWORD, :node ;Remove um nó do começo de uma lista
                                         ;(primeiro nó, último nó, tamanho da 
                                         ;lista)
-
-addNode proc firstN:dword, lastN:dword, lSize:dword, newN:node
-    
-    ret
-addNode endp
-
-removeF proc firstN:dword, lastN:dword, lSize:dword, newN:node
-    
-    ret
-removeF endp
 
 
 

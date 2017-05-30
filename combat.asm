@@ -26,6 +26,7 @@ include combat.inc
 
 .code 
 start:
+
 invoke GetModuleHandle, NULL
 mov hInstance, eax
 
@@ -471,6 +472,38 @@ updateDirec proc addrPlyr:dword
 
     ret
 updateDirec endp
+
+addNode proc firstN:dword, lastN:dword, lSize:dword, newValue:gameObj
+    assume eax:ptr node
+
+    mov al, TRACKED_SHOTS ;Número máximo de tiros na tela
+
+    .if [byte ptr lSize] == al ;Caso a lista esteja cheia:
+
+    .else
+        inc [lSize] ;Incrementa o número de valores da lista
+
+        mov al, SIZEOF node ;Calcula o tamanho da estrutura
+        invoke GlobalAlloc, GMEM_FIXED, al ;Aloca memória
+
+        mov (node ptr [lastN]).next, eax ;Faz o último nó apontar para a nova estrutura
+
+        ;Copia os dados na nova estrutura:
+        mov [eax].value.x, gameObj.x 
+        mov [eax].value.y, gameObj.y
+        mov [eax].value.speed, gameObj.speed
+        mov [eax].next, 0
+    .endif 
+
+    assume eax:nothing
+
+    ret
+addNode endp
+
+removeF proc firstN:dword, lastN:dword, lSize:dword, newN:node
+    
+    ret
+removeF endp
 
 end start
 
