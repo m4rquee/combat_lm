@@ -517,7 +517,7 @@ addNode proc fNodePtrPtr:dword, lNodePtrPtr:dword, sizePtr:dword, newValue:gameO
     ret
 addNode endp
 
-removeF proc firstN:dword, lastN:dword, sizePtr:dword, newValue:gameObj
+removeF proc fNodePtrPtr:dword, lNodePtrPtr:dword, sizePtr:dword
     
     ret
 removeF endp

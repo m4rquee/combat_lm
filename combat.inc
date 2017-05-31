@@ -111,9 +111,10 @@ canMov proto :gameObj, :gameObj ;Atualiza se cada jogador pode se mover
 ;ptr para um ptr do último nó, ptr para o tamanho da lista, novo dado):
 addNode proto :DWORD, :DWORD, :DWORD, :gameObj 
 
-removeF proto :DWORD, :DWORD, :DWORD, :gameObj ;Remove um nó do começo de uma lista
-                                            ;(primeiro nó, último nó, tamanho da 
-                                            ;lista)
+removeF proto :DWORD, :DWORD, :DWORD ;Remove um nó do começo de uma lista
+                                    ;(ptr para um ptr do primeiro nó, ptr 
+                                    ;para um ptr do último nó, ptr para o 
+                                    ;tamanho da lista)
 
 
 

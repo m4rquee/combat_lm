@@ -1,4 +1,5 @@
 *.exe
+*.rar
 rsrc.RES
 
 ## Ignore Visual Studio temporary files, build results, and
