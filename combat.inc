@@ -58,7 +58,7 @@ node ends
     IMG_SIZE2 equ IMG_SIZE * IMG_SIZE ;Quadrado de IMG_SIZE
     HALF_SIZE equ IMG_SIZE / 2 
 
-    SPEED equ 5 ;Velocidade dos jogadores
+    SPEED equ 3 ;Velocidade dos jogadores
 	MAX_SCORE equ 5 ;Score máximo para o termino do jogo
     MAX_LIFE equ 100 ;Vida inicial dos jogadores
     TRACKED_SHOTS equ 2 ;Número máximo de tiros na tela, 
@@ -111,10 +111,10 @@ canMov proto :gameObj, :gameObj ;Atualiza se cada jogador pode se mover
 ;ptr para um ptr do último nó, ptr para o tamanho da lista, novo dado):
 addNode proto :DWORD, :DWORD, :DWORD, :gameObj 
 
-removeF proto :DWORD, :DWORD, :DWORD ;Remove um nó do começo de uma lista
-                                    ;(ptr para um ptr do primeiro nó, ptr 
-                                    ;para um ptr do último nó, ptr para o 
-                                    ;tamanho da lista)
+removeFNode proto :DWORD, :DWORD, :DWORD ;Remove um nó do começo de uma lista
+                                        ;(ptr para um ptr do primeiro nó, ptr 
+                                        ;para um ptr do último nó, ptr para o 
+                                        ;tamanho da lista)
 
 
 

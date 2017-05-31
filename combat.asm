@@ -24,6 +24,8 @@ include combat.inc
     lShot2 dword 0 ;Último nó
     numShots2 byte 0 ;Número de nós
 
+	newVal gameObj <1, 2, <3, 4>>
+
 .code 
 start:
 
@@ -57,6 +59,12 @@ loadBitmaps proc ;Carrega os bitmaps do jogo:
 
     invoke LoadBitmap, hInstance, 107
     mov h107, eax
+
+	invoke addNode, addr fShot1, addr lShot1, addr numShots1, newVal
+	invoke addNode, addr fShot1, addr lShot1, addr numShots1, newVal
+	invoke addNode, addr fShot1, addr lShot1, addr numShots1, newVal
+
+	invoke removeFNode, addr fShot1, addr lShot1, addr numShots1	
 
     ret
 loadBitmaps endp
@@ -413,7 +421,7 @@ updateScreen endp
 
 gameHandler proc p:dword
     .while TRUE
-        invoke  Sleep, 75
+        invoke  Sleep, 45
         invoke canMov, player1.playerObj, player2.playerObj
 
         .if canPlyrsMov.x 
@@ -517,9 +525,37 @@ addNode proc fNodePtrPtr:dword, lNodePtrPtr:dword, sizePtr:dword, newValue:gameO
     ret
 addNode endp
 
-removeF proc fNodePtrPtr:dword, lNodePtrPtr:dword, sizePtr:dword
+removeFNode proc fNodePtrPtr:dword, lNodePtrPtr:dword, sizePtr:dword
+    local nodeSize:byte
     
+    mov ebx, sizePtr
+    mov al, [ebx]
+    mov nodeSize, al
+
+    .if nodeSize > 1
+        assume eax:ptr node
+
+        mov ecx, fNodePtrPtr 
+        mov eax, [ecx] ;Move o endereço do primeiro nó
+
+        mov edx, [eax].next ;Move o endereço do segundo nó  
+
+        mov [ecx], edx ;Aponta o ponteiro de início para o segundo nó 
+
+        invoke GlobalFree, eax ;Deleta o primeiro nó da memória  
+
+        assume eax:nothing
+    .elseif nodeSize == 1
+    .else
+        ret
+    .endif
+
+    dec nodeSize 
+    mov al, nodeSize
+    mov ebx, sizePtr
+    mov [ebx], al
+
     ret
-removeF endp
+removeFNode endp
 
 end start
