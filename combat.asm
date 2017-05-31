@@ -381,9 +381,9 @@ printPlyr proc plyr:player, _hdc:HDC, _hMemDC:HDC ;Desenha na tela um jogador:
     sub ebx, HALF_SIZE
 ;________________________________________________________________________________
 
-    invoke BitBlt, _hdc, eax, ebx,\
-        IMG_SIZE, IMG_SIZE, _hMemDC,\ 
-        0, 0, SRCCOPY
+    invoke TransparentBlt, _hdc, eax, ebx,\
+        IMG_SIZE, IMG_SIZE, _hMemDC,\    
+        0, 0, IMG_SIZE, IMG_SIZE, 16777215
 
     ret
 printPlyr endp
