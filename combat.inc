@@ -6,6 +6,7 @@ include C:\masm32\include\kernel32.inc
 include C:\masm32\include\Comctl32.inc
 include C:\masm32\include\comdlg32.inc
 include C:\masm32\include\shell32.inc
+include C:\masm32\include\msimg32.inc
 
 includelib C:\masm32\lib\masm32.lib
 includelib C:\masm32\lib\gdi32.lib
@@ -14,6 +15,7 @@ includelib C:\masm32\lib\kernel32.lib
 includelib C:\masm32\lib\Comctl32.lib
 includelib C:\masm32\lib\comdlg32.lib
 includelib C:\masm32\lib\shell32.lib
+includelib C:\masm32\lib\msimg32.lib
 
 ;=================
 ; structs
@@ -59,8 +61,10 @@ node ends
     SPEED equ 5 ;Velocidade dos jogadores
 	MAX_SCORE equ 5 ;Score máximo para o termino do jogo
     MAX_LIFE equ 100 ;Vida inicial dos jogadores
-    TRACKED_SHOTS equ 15 ;Número máximo de tiros na tela, 
+    TRACKED_SHOTS equ 2 ;Número máximo de tiros na tela, 
     					 ;antes deles desaparecerem (para cada jogador)
+
+    NODE_SIZE equ SIZEOF node ;Tamanho em bytes da estrutura de nó
 
 ;=================
 ; data
@@ -102,13 +106,14 @@ updateDirec proto :DWORD ;Atualiza a direção de um jogador
 canMov proto :gameObj, :gameObj ;Atualiza se cada jogador pode se mover
 
 ;Métodos de lista ligada:
-addNode proto :DWORD, :DWORD, :DWORD, :gameObj ;Adiciona um nó no final de uma lista
-                                        ;(primeiro nó, último nó, tamanho da 
-                                        ;lista, novo dado)
 
-removeF proto :DWORD, :DWORD, :DWORD, :node ;Remove um nó do começo de uma lista
-                                        ;(primeiro nó, último nó, tamanho da 
-                                        ;lista)
+;Adiciona um nó no final de uma lista (ptr para um ptr do primeiro nó, 
+;ptr para um ptr do último nó, ptr para o tamanho da lista, novo dado):
+addNode proto :DWORD, :DWORD, :DWORD, :gameObj 
+
+removeF proto :DWORD, :DWORD, :DWORD, :gameObj ;Remove um nó do começo de uma lista
+                                            ;(primeiro nó, último nó, tamanho da 
+                                            ;lista)
 
 
 

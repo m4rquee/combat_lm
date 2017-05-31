@@ -15,14 +15,14 @@ include combat.inc
 
     ;Listas ligada de tiros:
     ;Player1:
-    fShot1 node <> ;Primeiro nó
-    lShot1 node <> ;Último nó
-    numShots1 db 0 ;Número de nós
+    fShot1 dword 0 ;Primeiro nó
+    lShot1 dword 0 ;Último nó
+    numShots1 byte 0 ;Número de nós
 
     ;Player2:
-    fShot2 node <> ;Primeiro nó
-    lShot2 node <> ;Último nó
-    numShots2 db 0 ;Número de nós
+    fShot2 dword 0 ;Primeiro nó
+    lShot2 dword 0 ;Último nó
+    numShots2 byte 0 ;Número de nós
 
 .code 
 start:
@@ -66,7 +66,7 @@ WinMain proc hInst:HINSTANCE, CmdShow:dword
     local wc:WNDCLASSEX                                            
     local msg:MSG 
 
-	;Fill values in members of wc
+    ;Fill values in members of wc
     mov wc.cbSize, SIZEOF WNDCLASSEX  
     mov wc.style, CS_BYTEALIGNWINDOW or CS_BYTEALIGNCLIENT
     mov wc.lpfnWndProc, OFFSET WndProc 
@@ -111,13 +111,13 @@ WinMain proc hInst:HINSTANCE, CmdShow:dword
     invoke UpdateWindow, hWnd ;Refresh the client area
 
     ;Enter message loop
-	.while TRUE  
+    .while TRUE  
         invoke GetMessage, addr msg, NULL, 0, 0 
-        .break .if (!eax) 		
+        .break .if (!eax)       
 
         invoke TranslateMessage, addr msg 
         invoke DispatchMessage, addr msg
-	.endw 
+    .endw 
 
     mov eax, msg.wParam ;Return exit code in eax 
 
@@ -232,7 +232,7 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM ;wParam -
         .endif
 ;________________________________________________________________________________
 
-	.elseif uMsg == WM_PAINT ;Atualizar da página:-------------------------------  
+    .elseif uMsg == WM_PAINT ;Atualizar da página:-------------------------------  
          invoke updateScreen
     .else ;Default:
         invoke DefWindowProc, _hWnd, uMsg, wParam, lParam ;Default processing 
@@ -246,13 +246,13 @@ WndProc endp
 
 mult proc n1:word, n2:word ;Multiplica dois números (16 b) e coloca em eax:
     xor eax, eax 
-	xor edx, edx
+    xor edx, edx
 
     mov ax, n1
     mov bx, n2
 
     imul bx
-	shl edx, 16
+    shl edx, 16
 
     add eax, edx
 
@@ -261,7 +261,7 @@ mult endp
 
 movObj proc addrObj:dword ;Atualiza a posição de um gameObj de acordo com sua
                         ;velocidade:
-	assume ecx:ptr gameObj
+    assume ecx:ptr gameObj
     mov ecx, addrObj
 
     ;Eixo x:---------------------------------------------------------------------
@@ -293,7 +293,7 @@ movObj proc addrObj:dword ;Atualiza a posição de um gameObj de acordo com sua
     
     assume ecx:nothing
 
-	ret
+    ret
 movObj endp
 
 canMov proc p1:gameObj, p2:gameObj ;Atualiza se cada jogador pode se mover:
@@ -322,7 +322,7 @@ canMov proc p1:gameObj, p2:gameObj ;Atualiza se cada jogador pode se mover:
     add d2, eax
 
     ;Checa se os jogadores vão colidir:------------------------------------------
-;________________________________________________________________________________	
+;________________________________________________________________________________   
 
     .if d2 < IMG_SIZE2
         mov canPlyrsMov.x, FALSE
@@ -473,37 +473,53 @@ updateDirec proc addrPlyr:dword
     ret
 updateDirec endp
 
-addNode proc firstN:dword, lastN:dword, lSize:dword, newValue:gameObj
+addNode proc fNodePtrPtr:dword, lNodePtrPtr:dword, sizePtr:dword, newValue:gameObj
     assume eax:ptr node
 
-    mov al, TRACKED_SHOTS ;Número máximo de tiros na tela
+    invoke GlobalAlloc, GMEM_FIXED, NODE_SIZE ;Aloca memória para o novo nó
 
-    .if [byte ptr lSize] == al ;Caso a lista esteja cheia:
+    ;Copia os dados na nova estrutura alocada:-----------------------------------
+;________________________________________________________________________________
 
-    .else
-        inc [lSize] ;Incrementa o número de valores da lista
+    mov bx, newValue.x
+    mov [eax].value.x, bx
+    mov bx, newValue.y
+    mov [eax].value.y, bx
 
-        mov al, SIZEOF node ;Calcula o tamanho da estrutura
-        invoke GlobalAlloc, GMEM_FIXED, al ;Aloca memória
-
-        mov (node ptr [lastN]).next, eax ;Faz o último nó apontar para a nova estrutura
-
-        ;Copia os dados na nova estrutura:
-        mov [eax].value.x, gameObj.x 
-        mov [eax].value.y, gameObj.y
-        mov [eax].value.speed, gameObj.speed
-        mov [eax].next, 0
-    .endif 
+    mov bx, newValue.speed
+    mov [eax].value.speed, bx
+    
+    mov [eax].next, 0
 
     assume eax:nothing
+;________________________________________________________________________________
+
+    mov ecx, sizePtr
+    mov bh, [ecx]
+
+    inc bh 
+    mov [ecx], bh
+
+    .if bh == 1 ;Caso a lista esteja vazia:
+        mov ecx, fNodePtrPtr  
+        mov [ecx], eax ;Faz o ponteiro de começo apontar o novo nó
+    .else
+        mov ecx, lNodePtrPtr
+        mov ecx, [ecx]
+
+        mov (node ptr [ecx]).next, eax ;Faz o último nó apontar para a 
+                                    ;nova estrutura
+    .endif
+
+    mov ecx, lNodePtrPtr
+    mov [ecx], eax ;Faz o ponteiro de final apontar o novo
 
     ret
 addNode endp
 
-removeF proc firstN:dword, lastN:dword, lSize:dword, newN:node
+removeF proc firstN:dword, lastN:dword, sizePtr:dword, newValue:gameObj
     
     ret
 removeF endp
 
 end start
-
