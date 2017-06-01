@@ -528,31 +528,40 @@ addNode endp
 removeFNode proc fNodePtrPtr:dword, lNodePtrPtr:dword, sizePtr:dword
     local nodeSize:byte
     
+    ;Move para al o tamanho da lista:
     mov ebx, sizePtr
     mov al, [ebx]
-    mov nodeSize, al
-
-    .if nodeSize > 1
-        assume eax:ptr node
-
-        mov ecx, fNodePtrPtr 
-        mov eax, [ecx] ;Move o endereço do primeiro nó
-
-        mov edx, [eax].next ;Move o endereço do segundo nó  
-
-        mov [ecx], edx ;Aponta o ponteiro de início para o segundo nó 
-
-        invoke GlobalFree, eax ;Deleta o primeiro nó da memória  
-
-        assume eax:nothing
-    .elseif nodeSize == 1
-    .else
+    
+    .if al == 0 ;Caso a lista esteja vazia
         ret
     .endif
 
+    mov nodeSize, al
+
+    assume eax:ptr node
+
+    mov ecx, fNodePtrPtr 
+    mov eax, [ecx] ;Move o endereço do primeiro nó
+
+    .if nodeSize > 1
+        mov edx, [eax].next ;Move o endereço do segundo nó  
+
+        mov [ecx], edx ;Aponta o ponteiro de início para o segundo nó 
+    .else 
+        mov edx, 0
+
+        mov [ecx], edx ;Zera o ponteiro de início
+
+        mov ecx, lNodePtrPtr
+        mov [ecx], edx ;Zera o ponteiro de fim
+    .endif
+
+    invoke GlobalFree, eax ;Deleta o primeiro nó da memória
+
+    assume eax:nothing
+
     dec nodeSize 
     mov al, nodeSize
-    mov ebx, sizePtr
     mov [ebx], al
 
     ret
