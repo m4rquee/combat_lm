@@ -259,7 +259,7 @@ mult proc n1:word, n2:word ;Multiplica dois números (16 b) e coloca em eax:
     ret
 mult endp
 
-movObj proc addrObj:dword ;Atualiza a posição de um gameObj de acordo com sua
+movObj proc uses eax addrObj:dword ;Atualiza a posição de um gameObj de acordo com sua
                         ;velocidade:
     assume ecx:ptr gameObj
     mov ecx, addrObj
@@ -296,16 +296,46 @@ movObj proc addrObj:dword ;Atualiza a posição de um gameObj de acordo com sua
     ret
 movObj endp
 
-movShots proc ;Move todos o tiros:
-    
-    .while TRUE ;Move os tiros do player1
+movShots proc uses eax ;Move todos o tiros:
+    assume eax:ptr node
 
+    ;Move os tiros do player1
+    mov eax, fShot1
+
+    xor dl, dl
+    mov dh, numShots1 
+	.if dh == 3
+		mov dh, dh	
+	.endif
+
+    .while dl < dh
+        mov ecx, eax
+        add ecx, 4
+        invoke movObj, ecx
+
+        mov eax, [eax].next
+
+        inc dl
     .endw
 
-    .while TRUE ;Move os tiros do player2
-        
+    ;Move os tiros do player2
+    mov eax, fShot2
+
+    xor dl, dl
+    mov dh, numShots2 
+    .while dl < dh
+        mov ecx, eax
+        add ecx, 4
+        invoke movObj, ecx
+
+        mov eax, [eax].next
+
+        inc dl
     .endw
 
+    assume eax:nothing
+
+    ret
 movShots endp
 
 canMov proc p1:gameObj, p2:gameObj ;Atualiza se cada jogador pode se mover:
@@ -503,6 +533,8 @@ updateScreen endp
 gameHandler proc p:dword
     .while TRUE
         invoke  Sleep, 45
+
+        invoke movShots
 
         invoke canMov, player1.playerObj, player2.playerObj
 
