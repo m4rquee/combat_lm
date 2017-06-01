@@ -58,13 +58,16 @@ loadBitmaps proc ;Carrega os bitmaps do jogo:
     mov h106, eax
 
     invoke LoadBitmap, hInstance, 107
-    mov h107, eax
+    mov h107, eax	
 
 	invoke addNode, addr fShot1, addr lShot1, addr numShots1, newVal
 	invoke addNode, addr fShot1, addr lShot1, addr numShots1, newVal
-	invoke addNode, addr fShot1, addr lShot1, addr numShots1, newVal
 
-	invoke removeFNode, addr fShot1, addr lShot1, addr numShots1	
+	invoke removeFNode, addr fShot1, addr lShot1, addr numShots1
+
+
+	;invoke addNode, addr fShot1, addr lShot1, addr numShots1, newVal
+	;invoke addNode, addr fShot1, addr lShot1, addr numShots1, newVal
 
     ret
 loadBitmaps endp
@@ -125,6 +128,8 @@ WinMain proc hInst:HINSTANCE, CmdShow:dword
 
         invoke TranslateMessage, addr msg 
         invoke DispatchMessage, addr msg
+
+        
     .endw 
 
     mov eax, msg.wParam ;Return exit code in eax 
@@ -481,7 +486,9 @@ updateDirec proc addrPlyr:dword
     ret
 updateDirec endp
 
-addNode proc fNodePtrPtr:dword, lNodePtrPtr:dword, sizePtr:dword, newValue:gameObj
+addNode proc fNodePtrPtr:dword, lNodePtrPtr:dword, sizePtr:dword, 
+    newValue:gameObj ;Adiciona um nó no final de uma lista:
+
     assume eax:ptr node
 
     invoke GlobalAlloc, GMEM_FIXED, NODE_SIZE ;Aloca memória para o novo nó
@@ -532,22 +539,27 @@ removeFNode proc fNodePtrPtr:dword, lNodePtrPtr:dword, sizePtr:dword
     mov ebx, sizePtr
     mov al, [ebx]
     
-    .if al == 0 ;Caso a lista esteja vazia
+    .if al == 0 ;Caso a lista esteja vazia o método para:
         ret
     .endif
 
-    mov nodeSize, al
+    mov nodeSize, al ;Salva o tamanho da lista para uso posterior
 
     assume eax:ptr node
 
-    mov ecx, fNodePtrPtr 
+    ;Remove um nó da lista:
+;________________________________________________________________________________
+
+    mov ecx, fNodePtrPtr ;Move o local onde está salvo o endereço do primeiro nó
     mov eax, [ecx] ;Move o endereço do primeiro nó
 
-    .if nodeSize > 1
+    .if nodeSize > 1 ;Caso a lista tenha mais de um nó, o primeiro é removido e o
+                    ;ponteiro de início aponta o segundo nó:
         mov edx, [eax].next ;Move o endereço do segundo nó  
 
         mov [ecx], edx ;Aponta o ponteiro de início para o segundo nó 
-    .else 
+    .else ;Caso a lista tenha um unico nó, esse nó é removido e os ponteiro são 
+        ;zerados:
         mov edx, 0
 
         mov [ecx], edx ;Zera o ponteiro de início
@@ -557,9 +569,11 @@ removeFNode proc fNodePtrPtr:dword, lNodePtrPtr:dword, sizePtr:dword
     .endif
 
     invoke GlobalFree, eax ;Deleta o primeiro nó da memória
+;________________________________________________________________________________
 
     assume eax:nothing
 
+    ;Subtrai um do tamanho e salva o valor:
     dec nodeSize 
     mov al, nodeSize
     mov [ebx], al
