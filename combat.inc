@@ -58,10 +58,12 @@ node ends
     IMG_SIZE2 equ IMG_SIZE * IMG_SIZE ;Quadrado de IMG_SIZE
     HALF_SIZE equ IMG_SIZE / 2 
 
+    SHOT_RADIUS equ 3
+
     SPEED equ 3 ;Velocidade dos jogadores
 	MAX_SCORE equ 5 ;Score máximo para o termino do jogo
     MAX_LIFE equ 100 ;Vida inicial dos jogadores
-    TRACKED_SHOTS equ 5 ;Número máximo de tiros na tela, 
+    TRACKED_SHOTS equ 15 ;Número máximo de tiros na tela, 
     					 ;antes deles desaparecerem (para cada jogador)
 
     NODE_SIZE equ SIZEOF node ;Tamanho em bytes da estrutura de nó
@@ -98,8 +100,11 @@ loadBitmaps proto ;Carrega os bitmaps do jogo
 gameHandler proto :DWORD ;Thread principal do jogo
 
 updateScreen proto ;Desenha na tela todos os objetos
+printShots proto :HDC ;Desenha todos o tiros
+printShot proto :gameObj, :HDC ;Desenha o tiro passado
 printPlyr proto :player, :HDC, :HDC ;Desenha o jogador passado
 
+movShots proto ;Move todos o tiros
 movObj proto :DWORD ;Atualiza a posição do gameObj passado
 mult proto :WORD, :WORD ;Multiplica dois números (16 b) e coloca em eax
 updateDirec proto :DWORD ;Atualiza a direção de um jogador
@@ -121,11 +126,3 @@ removeFNode proto :DWORD, :DWORD, :DWORD ;Remove um nó do começo de uma lista
                                         ;(ptr para um ptr do primeiro nó, ptr 
                                         ;para um ptr do último nó, ptr para o 
                                         ;tamanho da lista)
-
-
-
-
-
-
-
-

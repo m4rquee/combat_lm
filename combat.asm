@@ -117,8 +117,6 @@ WinMain proc hInst:HINSTANCE, CmdShow:dword
 
         invoke TranslateMessage, addr msg 
         invoke DispatchMessage, addr msg
-
-        
     .endw 
 
     mov eax, msg.wParam ;Return exit code in eax 
@@ -204,14 +202,14 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM ;wParam -
             .endif
 ;________________________________________________________________________________
 
-        .elseif (wParam == 79h) ;y - Tiro player1:
+        .elseif (wParam == 59h) ;y - Tiro player1:
             mov isShooting.x, FALSE
-        .elseif (wParam == 75h) ;u - Especial player1:
+        .elseif (wParam == 55h) ;u - Especial player1:
 ;________________________________________________________________________________
 
-        .elseif (wParam == 32h) ;2 - Tiro player2:
+        .elseif (wParam == 62h) ;2 - Tiro player2:
             mov isShooting.y, FALSE
-        .elseif (wParam == 33h) ;3 - Especial player2:
+        .elseif (wParam == 63h) ;3 - Especial player2:
 ;________________________________________________________________________________
         
         ;Teclas de movimento player2:
@@ -297,6 +295,18 @@ movObj proc addrObj:dword ;Atualiza a posição de um gameObj de acordo com sua
 
     ret
 movObj endp
+
+movShots proc ;Move todos o tiros:
+    
+    .while TRUE ;Move os tiros do player1
+
+    .endw
+
+    .while TRUE ;Move os tiros do player2
+        
+    .endw
+
+movShots endp
 
 canMov proc p1:gameObj, p2:gameObj ;Atualiza se cada jogador pode se mover:
     local d2:dword ;Quadrado da distância entre os jogadores
@@ -390,6 +400,81 @@ printPlyr proc plyr:player, _hdc:HDC, _hMemDC:HDC ;Desenha na tela um jogador:
     ret
 printPlyr endp
 
+printShots proc uses eax edx _hdc:HDC ;Desenha todos o tiros:
+    local currShot:gameObj
+
+    assume eax:ptr node
+
+    ;Desenha os tiros do player1
+    mov eax, fShot1
+
+    xor dl, dl
+    mov dh, numShots1 
+    .while dl < dh
+        mov bx, [eax].value.x
+        mov currShot.x, bx
+        mov bx, [eax].value.y
+        mov currShot.y, bx
+
+        mov bx, [eax].value.speed
+        mov currShot.speed, bx
+
+        invoke printShot, currShot, _hdc 
+
+        mov eax, [eax].next
+
+        inc dl
+    .endw
+
+    ;Desenha os tiros do player2
+    mov eax, fShot2
+
+    xor dl, dl
+    mov dh, numShots2 
+    .while dl < dh
+        mov bx, [eax].value.x
+        mov currShot.x, bx
+        mov bx, [eax].value.y
+        mov currShot.y, bx
+
+        mov bx, [eax].value.speed
+        mov currShot.speed, bx
+
+        invoke printShot, currShot, _hdc 
+
+        mov eax, [eax].next
+
+        inc dl
+    .endw
+
+    assume eax:nothing
+
+    ret
+printShots endp
+
+printShot proc uses eax edx shot:gameObj, _hdc:HDC ;Desenha na tela um tiro:
+    local upperLX:dword
+    local upperLY:dword
+
+    movzx eax, shot.x
+    movzx ebx, shot.y
+    sub eax, SHOT_RADIUS
+    sub ebx, SHOT_RADIUS
+
+    mov upperLX, eax  
+    mov upperLY, ebx
+
+    movzx eax, shot.x
+    movzx ebx, shot.y
+    add eax, SHOT_RADIUS
+    add ebx, SHOT_RADIUS
+
+    invoke Ellipse, _hdc, upperLX, upperLY,\
+        eax, ebx
+
+    ret
+printShot endp
+
 updateScreen proc ;Desenha na tela todos os objetos:
     locaL ps:PAINTSTRUCT
     locaL hMemDC:HDC 
@@ -407,6 +492,8 @@ updateScreen proc ;Desenha na tela todos os objetos:
     invoke printPlyr, player1, hdc, hMemDC 
     invoke printPlyr, player2, hdc, hMemDC
 
+    invoke printShots, hdc 
+
     invoke DeleteDC, hMemDC 
     invoke EndPaint, hWnd, addr ps 
     
@@ -416,6 +503,7 @@ updateScreen endp
 gameHandler proc p:dword
     .while TRUE
         invoke  Sleep, 45
+
         invoke canMov, player1.playerObj, player2.playerObj
 
         .if canPlyrsMov.x 
@@ -596,7 +684,7 @@ removeFNode proc fNodePtrPtr:dword, lNodePtrPtr:dword, sizePtr:dword
         mov [ecx], edx ;Aponta o ponteiro de início para o segundo nó 
     .else ;Caso a lista tenha um unico nó, esse nó é removido e os ponteiro são 
         ;zerados:
-        mov edx, 0
+        xor edx, edx
 
         mov [ecx], edx ;Zera o ponteiro de início
 
