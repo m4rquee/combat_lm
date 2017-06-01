@@ -61,7 +61,7 @@ node ends
     SPEED equ 3 ;Velocidade dos jogadores
 	MAX_SCORE equ 5 ;Score máximo para o termino do jogo
     MAX_LIFE equ 100 ;Vida inicial dos jogadores
-    TRACKED_SHOTS equ 2 ;Número máximo de tiros na tela, 
+    TRACKED_SHOTS equ 5 ;Número máximo de tiros na tela, 
     					 ;antes deles desaparecerem (para cada jogador)
 
     NODE_SIZE equ SIZEOF node ;Tamanho em bytes da estrutura de nó

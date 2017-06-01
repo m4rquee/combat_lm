@@ -430,10 +430,11 @@ gameHandler proc p:dword
         invoke updateDirec, addr player2
 
         .if isShooting.x
-
+            invoke addShot, player1, addr fShot1, addr lShot1, addr numShots1 
         .endif
 
         .if isShooting.y
+			invoke addShot, player2, addr fShot2, addr lShot2, addr numShots2
         .endif
 
         .if canPlyrsMov.x || canPlyrsMov.y
@@ -484,7 +485,41 @@ updateDirec endp
 
 addShot proc plyr:player, fNodePtrPtr:dword, lNodePtrPtr:dword, sizePtr:dword 
     ;Adiciona um tiro em uma lista:
+    local newShoot: gameObj
+
+    mov eax, sizePtr
+    mov al, [eax]
+
+    .if al == TRACKED_SHOTS
+        invoke removeFNode, fNodePtrPtr, lNodePtrPtr, sizePtr
+    .endif 
     
+    mov ax, plyr.playerObj.x
+    mov newShoot.x, ax
+    mov ax, plyr.playerObj.y
+    mov newShoot.y, ax
+
+    mov al, plyr.direc
+
+    .if al == 0 || al == 1 || al == 2
+        mov newShoot.speed.y, 2 * -SPEED
+    .elseif al == 6 || al == 5 || al == 4
+        mov newShoot.speed.y, 2 * SPEED
+    .else ;Caso seja 3 ou 7
+        mov newShoot.speed.y, 0
+    .endif 
+
+    .if al == 0 || al == 7 || al == 6
+        mov newShoot.speed.x, 2 * -SPEED
+    .elseif al == 2 || al == 3 || al == 4
+        mov newShoot.speed.x, 2 * SPEED
+    .else ;Caso seja 1 ou 5
+        mov newShoot.speed.x, 0
+    .endif 
+
+    invoke addNode, fNodePtrPtr, lNodePtrPtr, sizePtr, newShoot
+
+    ret
 addShot endp
 
 addNode proc fNodePtrPtr:dword, lNodePtrPtr:dword, sizePtr:dword, 
