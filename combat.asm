@@ -24,8 +24,6 @@ include combat.inc
     lShot2 dword 0 ;Último nó
     numShots2 byte 0 ;Número de nós
 
-	newVal gameObj <1, 2, <3, 4>>
-
 .code 
 start:
 
@@ -59,15 +57,6 @@ loadBitmaps proc ;Carrega os bitmaps do jogo:
 
     invoke LoadBitmap, hInstance, 107
     mov h107, eax	
-
-	invoke addNode, addr fShot1, addr lShot1, addr numShots1, newVal
-	invoke addNode, addr fShot1, addr lShot1, addr numShots1, newVal
-
-	invoke removeFNode, addr fShot1, addr lShot1, addr numShots1
-
-
-	;invoke addNode, addr fShot1, addr lShot1, addr numShots1, newVal
-	;invoke addNode, addr fShot1, addr lShot1, addr numShots1, newVal
 
     ret
 loadBitmaps endp
@@ -440,6 +429,13 @@ gameHandler proc p:dword
         invoke updateDirec, addr player1
         invoke updateDirec, addr player2
 
+        .if isShooting.x
+
+        .endif
+
+        .if isShooting.y
+        .endif
+
         .if canPlyrsMov.x || canPlyrsMov.y
             invoke InvalidateRect, hWnd, NULL, TRUE
         .endif 
@@ -485,6 +481,11 @@ updateDirec proc addrPlyr:dword
 
     ret
 updateDirec endp
+
+addShot proc plyr:player, fNodePtrPtr:dword, lNodePtrPtr:dword, sizePtr:dword 
+    ;Adiciona um tiro em uma lista:
+    
+addShot endp
 
 addNode proc fNodePtrPtr:dword, lNodePtrPtr:dword, sizePtr:dword, 
     newValue:gameObj ;Adiciona um nó no final de uma lista:
@@ -533,7 +534,7 @@ addNode proc fNodePtrPtr:dword, lNodePtrPtr:dword, sizePtr:dword,
 addNode endp
 
 removeFNode proc fNodePtrPtr:dword, lNodePtrPtr:dword, sizePtr:dword
-    local nodeSize:byte
+    local nodeSize:byte ;Remove um nó do começo de uma lista:
     
     ;Move para al o tamanho da lista:
     mov ebx, sizePtr

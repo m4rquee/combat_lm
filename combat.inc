@@ -105,6 +105,12 @@ mult proto :WORD, :WORD ;Multiplica dois números (16 b) e coloca em eax
 updateDirec proto :DWORD ;Atualiza a direção de um jogador
 canMov proto :gameObj, :gameObj ;Atualiza se cada jogador pode se mover
 
+addShot proto :player, :DWORD, :DWORD, :DWORD ;Adiciona um tiro em uma lista
+                                            ;(dados do jogador que atirou, ptr 
+                                            ;para um ptr do primeiro nó, ptr para
+                                            ;um ptr do último nó, ptr para o 
+                                            ;tamanho da lista)
+
 ;Métodos de lista ligada:
 
 ;Adiciona um nó no final de uma lista (ptr para um ptr do primeiro nó, 
