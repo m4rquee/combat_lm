@@ -24,6 +24,8 @@ include combat.inc
     lShot2 dword 0 ;Último nó
     numShots2 byte 0 ;Número de nós
 
+    shotsDelays pair <0, 0> ;Delay dos tiros
+
 .code 
 start:
 
@@ -160,7 +162,7 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM ;wParam -
 ;________________________________________________________________________________
 
         .elseif (wParam == 32h) ;2 - Tiro player2:
-            mov isShooting.y, TRUE
+            mov isShooting.y, TRUE      
         .elseif (wParam == 33h) ;3 - Especial player2:
         .endif
 ;________________________________________________________________________________
@@ -204,11 +206,13 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM ;wParam -
 
         .elseif (wParam == 59h) ;y - Tiro player1:
             mov isShooting.x, FALSE
+            mov shotsDelays.x, 0
         .elseif (wParam == 55h) ;u - Especial player1:
 ;________________________________________________________________________________
 
         .elseif (wParam == 62h) ;2 - Tiro player2:
             mov isShooting.y, FALSE
+            mov shotsDelays.y, 0
         .elseif (wParam == 63h) ;3 - Especial player2:
 ;________________________________________________________________________________
         
@@ -532,7 +536,7 @@ updateScreen endp
 
 gameHandler proc p:dword
     .while TRUE
-        invoke  Sleep, 45
+        invoke  Sleep, 60
 
         invoke movShots
 
@@ -550,11 +554,21 @@ gameHandler proc p:dword
         invoke updateDirec, addr player2
 
         .if isShooting.x
-            invoke addShot, player1, addr fShot1, addr lShot1, addr numShots1 
+        	.if shotsDelays.x == SHOTS_DELAY
+            	invoke addShot, player1, addr fShot1, addr lShot1, addr numShots1 
+            	mov shotsDelays.x, 0
+            .else
+            	inc shotsDelays.x
+            .endif
         .endif
 
         .if isShooting.y
-			invoke addShot, player2, addr fShot2, addr lShot2, addr numShots2
+        	.if shotsDelays.y == SHOTS_DELAY
+				invoke addShot, player2, addr fShot2, addr lShot2, addr numShots2
+				mov shotsDelays.y, 0
+            .else
+            	inc shotsDelays.y
+            .endif
         .endif
 
         .if canPlyrsMov.x || canPlyrsMov.y
@@ -622,17 +636,17 @@ addShot proc plyr:player, fNodePtrPtr:dword, lNodePtrPtr:dword, sizePtr:dword
     mov al, plyr.direc
 
     .if al == 0 || al == 1 || al == 2
-        mov newShoot.speed.y, 2 * -SPEED
+        mov newShoot.speed.y, 3 * -SPEED
     .elseif al == 6 || al == 5 || al == 4
-        mov newShoot.speed.y, 2 * SPEED
+        mov newShoot.speed.y, 3 * SPEED
     .else ;Caso seja 3 ou 7
         mov newShoot.speed.y, 0
     .endif 
 
     .if al == 0 || al == 7 || al == 6
-        mov newShoot.speed.x, 2 * -SPEED
+        mov newShoot.speed.x, 3 * -SPEED
     .elseif al == 2 || al == 3 || al == 4
-        mov newShoot.speed.x, 2 * SPEED
+        mov newShoot.speed.x, 3 * SPEED
     .else ;Caso seja 1 ou 5
         mov newShoot.speed.x, 0
     .endif 

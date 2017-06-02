@@ -60,9 +60,10 @@ node ends
 
     SHOT_RADIUS equ 3
 
-    SPEED equ 3 ;Velocidade dos jogadores
-	MAX_SCORE equ 5 ;Score máximo para o termino do jogo
+    SPEED equ 4 ;Velocidade dos jogadores
+    MAX_SCORE equ 5 ;Score máximo para o termino do jogo
     MAX_LIFE equ 100 ;Vida inicial dos jogadores
+    SHOTS_DELAY equ 15 ;Número de ciclos de espera para atirar
     TRACKED_SHOTS equ 15 ;Número máximo de tiros na tela, 
     					 ;antes deles desaparecerem (para cada jogador)
 
