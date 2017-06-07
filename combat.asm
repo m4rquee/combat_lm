@@ -312,10 +312,6 @@ movShots proc uses eax ;Move todos o tiros:
 
     xor dl, dl
     mov dh, numShots1 
-	.if dh == 3
-		mov dh, dh	
-	.endif
-
     .while dl < dh
         mov ecx, eax
         add ecx, 4
@@ -399,6 +395,55 @@ canMov proc p1:gameObj, p2:gameObj ;Atualiza se cada jogador pode se mover:
 
     ret
 canMov endp
+
+checkCrashs proc
+    assume ebx:ptr node
+
+    ;Checa se o jogador 2 foi atingido:
+    mov ebx, fShot1
+
+    xor dl, dl
+    mov dh, numShots1
+    .while dl < dh
+        mov ecx, ebx
+        add ecx, 4
+
+        .if eax == TRUE
+            invoke incScore, addr scoreP1
+            .break .if (TRUE)
+        .endif
+
+        mov ebx, [ebx].next
+        inc dl
+    .endw
+
+    ;Checa se o jogador 1 foi atingido:
+    mov ebx, fShot2
+
+    xor dl, dl
+    mov dh, numShots2
+    .while dl < dh
+        mov ecx, ebx
+        add ecx, 4
+
+        .if eax == TRUE
+            invoke incScore, addr scoreP2
+            .break .if (TRUE)
+        .endif
+
+        mov ebx, [ebx].next
+        inc dl
+    .endw
+
+    assume ebx:nothing
+
+    ret
+checkCrashs endp
+
+checkShot proc plyr:gameObj, shot:gameObj
+    
+    ret
+checkShot endp
 
 printPlyr proc plyr:player, _hdc:HDC, _hMemDC:HDC ;Desenha na tela um jogador:
     ;Seleciona qual imagem vai ser desenhada:
@@ -656,7 +701,7 @@ updateDirec endp
 
 addShot proc plyr:player, fNodePtrPtr:dword, lNodePtrPtr:dword, sizePtr:dword 
     ;Adiciona um tiro em uma lista:
-    local newShoot: gameObj
+    local newShot: gameObj
 
     mov eax, sizePtr
     mov al, [eax]
@@ -666,33 +711,33 @@ addShot proc plyr:player, fNodePtrPtr:dword, lNodePtrPtr:dword, sizePtr:dword
     .endif 
     
     mov ax, plyr.playerObj.x
-    mov newShoot.x, ax
+    mov newShot.x, ax
     mov ax, plyr.playerObj.y
-    mov newShoot.y, ax
+    mov newShot.y, ax
 
     mov al, plyr.direc
 
     .if al == 0 || al == 1 || al == 2
-        mov newShoot.speed.y, 3 * -SPEED
-        sub newShoot.y, HALF_SIZE
+        mov newShot.speed.y, 3 * -SPEED
+        sub newShot.y, HALF_SIZE
     .elseif al == 6 || al == 5 || al == 4
-        mov newShoot.speed.y, 3 * SPEED
-        add newShoot.y, HALF_SIZE
+        mov newShot.speed.y, 3 * SPEED
+        add newShot.y, HALF_SIZE
     .else ;Caso seja 3 ou 7
-        mov newShoot.speed.y, 0
+        mov newShot.speed.y, 0
     .endif 
 
     .if al == 0 || al == 7 || al == 6
-        mov newShoot.speed.x, 3 * -SPEED
-        sub newShoot.x, HALF_SIZE
+        mov newShot.speed.x, 3 * -SPEED
+        sub newShot.x, HALF_SIZE
     .elseif al == 2 || al == 3 || al == 4
-        mov newShoot.speed.x, 3 * SPEED
-        add newShoot.x, HALF_SIZE
+        mov newShot.speed.x, 3 * SPEED
+        add newShot.x, HALF_SIZE
     .else ;Caso seja 1 ou 5
-        mov newShoot.speed.x, 0
+        mov newShot.speed.x, 0
     .endif 
 
-    invoke addNode, fNodePtrPtr, lNodePtrPtr, sizePtr, newShoot
+    invoke addNode, fNodePtrPtr, lNodePtrPtr, sizePtr, newShot
 
     ret
 addShot endp

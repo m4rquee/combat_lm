@@ -66,7 +66,7 @@ node ends
     MAX_SCORE equ 5 ;Score máximo para o termino do jogo
     MAX_LIFE equ 100 ;Vida inicial dos jogadores
     SHOTS_DELAY equ 3 ;Número de ciclos de espera para atirar
-    TRACKED_SHOTS equ 30 ;Número máximo de tiros na tela, 
+    TRACKED_SHOTS equ 25 ;Número máximo de tiros na tela, 
     					 ;antes deles desaparecerem (para cada jogador)
 
     NODE_SIZE equ SIZEOF node ;Tamanho em bytes da estrutura de nó
@@ -119,6 +119,10 @@ canMov proto :gameObj, :gameObj ;Atualiza se cada jogador pode se mover
 mult proto :WORD, :WORD ;Multiplica dois números (16 b) e coloca em eax
 
 incScore proto :DWORD ;Incrementa o score do jogador passado
+
+checkCrashs proto ;Incrementa o score e restabelece a posição dos
+                ;jogadores, quando um jogador acerta um tiro
+checkShot proto :gameObj, :gameObj ;Checa se um tiro atingiu um jogador 
 
 ;Métodos de lista ligada:
 
