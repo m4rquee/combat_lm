@@ -9,9 +9,13 @@ include combat.inc
     player1 player <MAX_LIFE, 7, <IMG_SIZE, WIN_HT / 2, <0, 0>>>
     player2 player <MAX_LIFE, 3, <WIN_WD - IMG_SIZE, WIN_HT / 2, <0, 0>>>
 
-    canPlyrsMov pair <0, 0> ;Indica se cada jogador pode se mover
     isShooting pair <0, 0> ;Indica se cada jogador está atirando
-    score pair <0, 0> ;Score de cada jogador
+    canPlyrsMov pair <0, 0> ;Indica se cada jogador pode se mover
+
+    scoreP1 pair <48 + 0, 48 + 0> ;Score do primeiro jogador
+    scoreP2 pair <48 + 0, 48 + 0> ;Score do segundo jogador
+
+    maxScore pair <48 + 1, 48 + 0> ;Score máximo
 
     ;Listas ligada de tiros:
     ;Player1:
@@ -508,6 +512,39 @@ printShot proc uses eax edx shot:gameObj, _hdc:HDC ;Desenha na tela um tiro:
 
     ret
 printShot endp
+    
+printScores proc _hdc:HDC
+    invoke SetTextAlign, _hdc, TA_LEFT
+    invoke TextOut, _hdc, SCORE_SPACING, SCORE_SPACING, addr scoreP1, 2
+
+    invoke SetTextAlign, _hdc, TA_RIGHT
+    invoke TextOut, _hdc, WIN_WD - SCORE_SPACING, SCORE_SPACING, addr scoreP2, 2
+
+    ret
+printScores endp
+
+incScore proc addrScore:dword
+    assume eax:ptr pair
+    mov eax, addrScore
+
+    .if [eax].y == 48 + 9
+        mov [eax].y, 48 + 0
+
+        .if [eax].x == 48 + 9
+            mov [eax].x, 48 + 0
+            mov [eax].y, 48 + 0
+        .else
+            inc [eax].x
+        .endif
+    .else
+        inc [eax].y
+    .endif
+
+
+    assume eax:nothing
+
+    ret
+incScore endp
 
 updateScreen proc ;Desenha na tela todos os objetos:
     locaL ps:PAINTSTRUCT
@@ -527,6 +564,8 @@ updateScreen proc ;Desenha na tela todos os objetos:
     invoke printPlyr, player2, hdc, hMemDC
 
     invoke printShots, hdc 
+
+    invoke printScores, hdc
 
     invoke DeleteDC, hMemDC 
     invoke EndPaint, hWnd, addr ps 
@@ -571,9 +610,7 @@ gameHandler proc p:dword
             .endif
         .endif
 
-        .if canPlyrsMov.x || canPlyrsMov.y
-            invoke InvalidateRect, hWnd, NULL, TRUE
-        .endif 
+        invoke InvalidateRect, hWnd, NULL, TRUE
     .endw
 
     ret
@@ -637,16 +674,20 @@ addShot proc plyr:player, fNodePtrPtr:dword, lNodePtrPtr:dword, sizePtr:dword
 
     .if al == 0 || al == 1 || al == 2
         mov newShoot.speed.y, 3 * -SPEED
+        sub newShoot.y, HALF_SIZE
     .elseif al == 6 || al == 5 || al == 4
         mov newShoot.speed.y, 3 * SPEED
+        add newShoot.y, HALF_SIZE
     .else ;Caso seja 3 ou 7
         mov newShoot.speed.y, 0
     .endif 
 
     .if al == 0 || al == 7 || al == 6
         mov newShoot.speed.x, 3 * -SPEED
+        sub newShoot.x, HALF_SIZE
     .elseif al == 2 || al == 3 || al == 4
         mov newShoot.speed.x, 3 * SPEED
+        add newShoot.x, HALF_SIZE
     .else ;Caso seja 1 ou 5
         mov newShoot.speed.x, 0
     .endif 

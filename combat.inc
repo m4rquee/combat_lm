@@ -48,8 +48,8 @@ node ends
 ; consts
 ;=================
 .const
-	WIN_WD equ 1000 ;Largura da janela
 	WIN_HT equ 500 ;Altura da janela
+    WIN_WD equ 1000 ;Largura da janela
 
     OFFSETX equ WIN_WD - HALF_SIZE
     OFFSETY equ WIN_HT - HALF_SIZE
@@ -60,11 +60,13 @@ node ends
 
     SHOT_RADIUS equ 3
 
+    SCORE_SPACING equ 10 ;Espaço de separação dos digitos do jogo
+
     SPEED equ 4 ;Velocidade dos jogadores
     MAX_SCORE equ 5 ;Score máximo para o termino do jogo
     MAX_LIFE equ 100 ;Vida inicial dos jogadores
-    SHOTS_DELAY equ 15 ;Número de ciclos de espera para atirar
-    TRACKED_SHOTS equ 15 ;Número máximo de tiros na tela, 
+    SHOTS_DELAY equ 3 ;Número de ciclos de espera para atirar
+    TRACKED_SHOTS equ 30 ;Número máximo de tiros na tela, 
     					 ;antes deles desaparecerem (para cada jogador)
 
     NODE_SIZE equ SIZEOF node ;Tamanho em bytes da estrutura de nó
@@ -101,23 +103,30 @@ loadBitmaps proto ;Carrega os bitmaps do jogo
 gameHandler proto :DWORD ;Thread principal do jogo
 
 updateScreen proto ;Desenha na tela todos os objetos
+
 printShots proto :HDC ;Desenha todos o tiros
+printScores proto :HDC ;Desenha os placares dos jogadores
 printShot proto :gameObj, :HDC ;Desenha o tiro passado
 printPlyr proto :player, :HDC, :HDC ;Desenha o jogador passado
 
 movShots proto ;Move todos o tiros
 movObj proto :DWORD ;Atualiza a posição do gameObj passado
-mult proto :WORD, :WORD ;Multiplica dois números (16 b) e coloca em eax
+
 updateDirec proto :DWORD ;Atualiza a direção de um jogador
+
 canMov proto :gameObj, :gameObj ;Atualiza se cada jogador pode se mover
+
+mult proto :WORD, :WORD ;Multiplica dois números (16 b) e coloca em eax
+
+incScore proto :DWORD ;Incrementa o score do jogador passado
+
+;Métodos de lista ligada:
 
 addShot proto :player, :DWORD, :DWORD, :DWORD ;Adiciona um tiro em uma lista
                                             ;(dados do jogador que atirou, ptr 
                                             ;para um ptr do primeiro nó, ptr para
                                             ;um ptr do último nó, ptr para o 
                                             ;tamanho da lista)
-
-;Métodos de lista ligada:
 
 ;Adiciona um nó no final de uma lista (ptr para um ptr do primeiro nó, 
 ;ptr para um ptr do último nó, ptr para o tamanho da lista, novo dado):
