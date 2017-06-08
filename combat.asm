@@ -15,7 +15,7 @@ include combat.inc
     scoreP1 pair <48 + 0, 48 + 0> ;Score do primeiro jogador
     scoreP2 pair <48 + 0, 48 + 0> ;Score do segundo jogador
 
-    maxScore pair <48 + 1, 48 + 0> ;Score máximo
+    maxScore pair <48 + 0, 48 + 5> ;Score máximo
 
     hit db FALSE ;Indica se algum jogador pontuo
 
@@ -31,6 +31,8 @@ include combat.inc
     numShots2 byte 0 ;Número de nós
 
     shotsDelays pair <0, 0> ;Delay dos tiros
+
+    over byte 0 ;Indica se o jogo acabou
 
 .code 
 start:
@@ -267,7 +269,7 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM ;wParam -
 ;________________________________________________________________________________
 
     .elseif uMsg == WM_PAINT ;Atualizar da página:-------------------------------  
-         invoke updateScreen
+        invoke updateScreen
     .else ;Default:
         invoke DefWindowProc, _hWnd, uMsg, wParam, lParam ;Default processing 
         ret 
@@ -680,15 +682,27 @@ updateScreen proc ;Desenha na tela todos os objetos:
     invoke CreateCompatibleDC, hdc 
     mov hMemDC, eax 
     
-    ;Desenha os jogadores:-------------------------------------------------------
-;________________________________________________________________________________
+    .if !over
+        ;Desenha os jogadores:
+        invoke printPlyr, player1, hdc, hMemDC, TRUE
+        invoke printPlyr, player2, hdc, hMemDC, FALSE
 
-    invoke printPlyr, player1, hdc, hMemDC, TRUE
-    invoke printPlyr, player2, hdc, hMemDC, FALSE
+        ;Desenha os tiros:
+        invoke printShots, hdc 
 
-    invoke printShots, hdc 
+        ;Desenha os scores:
+        invoke printScores, hdc
+    .else
+        invoke SetTextAlign, hdc, TA_CENTER
 
-    invoke printScores, hdc
+        .if over == 3
+            invoke TextOut, hdc, WIN_WD / 2, WIN_HT / 2, addr draw, len_draw
+        .elseif over == 1
+            invoke TextOut, hdc, WIN_WD / 2, WIN_HT / 2, addr won1, len_won1
+        .elseif over == 2
+            invoke TextOut, hdc, WIN_WD / 2, WIN_HT / 2, addr won2, len_won2
+        .endif
+    .endif
 
     invoke DeleteDC, hMemDC 
     invoke EndPaint, hWnd, addr ps 
@@ -697,7 +711,7 @@ updateScreen proc ;Desenha na tela todos os objetos:
 updateScreen endp
 
 gameHandler proc p:dword
-    .while TRUE
+    .while !over
         invoke  Sleep, 60
 
         invoke movShots
@@ -744,6 +758,18 @@ gameHandler proc p:dword
             invoke clearAllShots
 
             invoke resetAll
+        .endif
+
+        mov dl, maxScore.x
+        mov dh, maxScore.y
+        .if scoreP1.x == dl && scoreP1.y == dh
+            invoke clearAllShots
+            mov over, 1
+        .endif
+            
+        .if scoreP2.x == dl && scoreP2.y == dh
+            invoke clearAllShots
+            or over, 2
         .endif
 
         invoke InvalidateRect, hWnd, NULL, TRUE

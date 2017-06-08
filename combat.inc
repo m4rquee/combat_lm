@@ -48,8 +48,8 @@ node ends
 ; consts
 ;=================
 .const
-	WIN_HT equ 800 ;Altura da janela
-    WIN_WD equ 1300 ;Largura da janela
+	WIN_HT equ 700 ;Altura da janela
+    WIN_WD equ 1200 ;Largura da janela
 
     OFFSETX equ WIN_WD - HALF_SIZE
     OFFSETY equ WIN_HT - HALF_SIZE
@@ -68,7 +68,7 @@ node ends
     SPEED equ 4 ;Velocidade dos jogadores
     MAX_SCORE equ 5 ;Score máximo para o termino do jogo
     MAX_LIFE equ 100 ;Vida inicial dos jogadores
-    SHOTS_DELAY equ 13 ;Número de ciclos de espera para atirar
+    SHOTS_DELAY equ 7 ;Número de ciclos de espera para atirar
     TRACKED_SHOTS equ 255 ;Número máximo de tiros na tela, 
     					 ;antes deles desaparecerem (para cada jogador)
 
@@ -80,6 +80,15 @@ node ends
 .data      
 AppName db "Combat", 0 ;Título da janela
 ClassName db "CombatClass", 0 ;Classe da janela
+
+won1 db "O jogador 1 ganhou!!!", 0
+len_won1 equ $ - won1
+
+won2 db "O jogador 2 ganhou!!!", 0
+len_won2 equ $ - won2
+
+draw db "Ouve um empate!!!", 0
+len_draw equ $ - draw
 
 ;Bitmaps do jogador 1:
 h100 dd 0
