@@ -17,6 +17,8 @@ include combat.inc
 
     maxScore pair <48 + 1, 48 + 0> ;Score máximo
 
+    hit db FALSE ;Indica se algum jogador pontuo
+
     ;Listas ligada de tiros:
     ;Player1:
     fShot1 dword 0 ;Primeiro nó
@@ -63,6 +65,30 @@ loadBitmaps proc ;Carrega os bitmaps do jogo:
 
     invoke LoadBitmap, hInstance, 107
     mov h107, eax	
+
+    invoke LoadBitmap, hInstance, 110
+    mov h110, eax
+
+    invoke LoadBitmap, hInstance, 111
+    mov h111, eax
+
+    invoke LoadBitmap, hInstance, 112
+    mov h112, eax
+
+    invoke LoadBitmap, hInstance, 113
+    mov h113, eax
+
+    invoke LoadBitmap, hInstance, 114
+    mov h114, eax
+
+    invoke LoadBitmap, hInstance, 115
+    mov h115, eax
+
+    invoke LoadBitmap, hInstance, 116
+    mov h116, eax
+
+    invoke LoadBitmap, hInstance, 117
+    mov h117, eax	
 
     ret
 loadBitmaps endp
@@ -252,7 +278,7 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM ;wParam -
     ret 
 WndProc endp
 
-mult proc n1:word, n2:word ;Multiplica dois números (16 b) e coloca em eax:
+mult proc uses ebx edx n1:word, n2:word ;Multiplica dois números (16 b) e coloca em eax:
     xor eax, eax 
     xor edx, edx
 
@@ -267,8 +293,8 @@ mult proc n1:word, n2:word ;Multiplica dois números (16 b) e coloca em eax:
     ret
 mult endp
 
-movObj proc uses eax addrObj:dword ;Atualiza a posição de um gameObj de acordo com sua
-                        ;velocidade:
+movObj proc uses eax addrObj:dword ;Atualiza a posição de um gameObj de acordo 
+                        ;com sua velocidade:
     assume ecx:ptr gameObj
     mov ecx, addrObj
 
@@ -396,7 +422,7 @@ canMov proc p1:gameObj, p2:gameObj ;Atualiza se cada jogador pode se mover:
     ret
 canMov endp
 
-checkCrashs proc
+checkCrashs proc uses ebx edx
     assume ebx:ptr node
 
     ;Checa se o jogador 2 foi atingido:
@@ -405,11 +431,15 @@ checkCrashs proc
     xor dl, dl
     mov dh, numShots1
     .while dl < dh
-        mov ecx, ebx
-        add ecx, 4
+        invoke checkShot, player2.playerObj, [ebx].value
 
-        .if eax == TRUE
+        .if eax
+			invoke checkShot, player2.playerObj, [ebx].value
+
             invoke incScore, addr scoreP1
+
+            mov hit, TRUE
+
             .break .if (TRUE)
         .endif
 
@@ -423,11 +453,13 @@ checkCrashs proc
     xor dl, dl
     mov dh, numShots2
     .while dl < dh
-        mov ecx, ebx
-        add ecx, 4
+        invoke checkShot, player1.playerObj, [ebx].value
 
-        .if eax == TRUE
+        .if eax
             invoke incScore, addr scoreP2
+
+            mov hit, TRUE
+
             .break .if (TRUE)
         .endif
 
@@ -441,31 +473,76 @@ checkCrashs proc
 checkCrashs endp
 
 checkShot proc plyr:gameObj, shot:gameObj
+    local d2:dword ;Quadrado da distância entre o tiro e o jogador
+                   ;d^2 = (xp - xs)^2 + (yp - ys)^2
+
+    ;Calcula d2:-----------------------------------------------------------------
+;________________________________________________________________________________
+
+    ;Calcula (xp - xs)^2 e coloca em d2:
+    mov ax, plyr.x 
+    sub ax, shot.x
+    invoke mult, ax, ax
+    mov d2, eax
+
+    ;Calcula (yp - ys)^2 e soma em d2:
+    mov ax, plyr.y 
+    sub ax, shot.y
+    invoke mult, ax, ax
+    add d2, eax
+
+;Checa se o tiro vai colidir:----------------------------------------------------
+;________________________________________________________________________________   
+
+    .if d2 < D2_SHOT
+        mov eax, TRUE
+	.else 
+		mov eax, FALSE
+    .endif
     
     ret
 checkShot endp
 
-printPlyr proc plyr:player, _hdc:HDC, _hMemDC:HDC ;Desenha na tela um jogador:
+printPlyr proc plyr:player, _hdc:HDC, _hMemDC:HDC, whichImg:byte ;Desenha na tela um jogador:
     ;Seleciona qual imagem vai ser desenhada:
 ;________________________________________________________________________________
-
-    .if plyr.direc == 0
-        invoke SelectObject, _hMemDC, h100
-    .elseif plyr.direc == 1
-        invoke SelectObject, _hMemDC, h101
-    .elseif plyr.direc == 2
-        invoke SelectObject, _hMemDC, h102
-    .elseif plyr.direc == 3
-        invoke SelectObject, _hMemDC, h103
-    .elseif plyr.direc == 4
-        invoke SelectObject, _hMemDC, h104
-    .elseif plyr.direc == 5
-        invoke SelectObject, _hMemDC, h105
-    .elseif plyr.direc == 6
-        invoke SelectObject, _hMemDC, h106
-    .else
-        invoke SelectObject, _hMemDC, h107
-    .endif
+	.if whichImg
+	    .if plyr.direc == 0
+	        invoke SelectObject, _hMemDC, h100
+	    .elseif plyr.direc == 1
+	        invoke SelectObject, _hMemDC, h101
+	    .elseif plyr.direc == 2
+	        invoke SelectObject, _hMemDC, h102
+	    .elseif plyr.direc == 3
+	        invoke SelectObject, _hMemDC, h103
+	    .elseif plyr.direc == 4
+	        invoke SelectObject, _hMemDC, h104
+	    .elseif plyr.direc == 5
+	        invoke SelectObject, _hMemDC, h105
+	    .elseif plyr.direc == 6
+	        invoke SelectObject, _hMemDC, h106
+	    .else
+	        invoke SelectObject, _hMemDC, h107
+	    .endif
+	.else
+		.if plyr.direc == 0
+	        invoke SelectObject, _hMemDC, h110
+	    .elseif plyr.direc == 1
+	        invoke SelectObject, _hMemDC, h111
+	    .elseif plyr.direc == 2
+	        invoke SelectObject, _hMemDC, h112
+	    .elseif plyr.direc == 3
+	        invoke SelectObject, _hMemDC, h113
+	    .elseif plyr.direc == 4
+	        invoke SelectObject, _hMemDC, h114
+	    .elseif plyr.direc == 5
+	        invoke SelectObject, _hMemDC, h115
+	    .elseif plyr.direc == 6
+	        invoke SelectObject, _hMemDC, h116
+	    .else
+	        invoke SelectObject, _hMemDC, h117
+	    .endif
+	.endif
 
     ;Calcula as coordenadas do ponto superior esquerdo:
 ;________________________________________________________________________________
@@ -474,6 +551,7 @@ printPlyr proc plyr:player, _hdc:HDC, _hMemDC:HDC ;Desenha na tela um jogador:
     movzx ebx, plyr.playerObj.y
     sub eax, HALF_SIZE
     sub ebx, HALF_SIZE
+
 ;________________________________________________________________________________
 
     invoke TransparentBlt, _hdc, eax, ebx,\
@@ -605,8 +683,8 @@ updateScreen proc ;Desenha na tela todos os objetos:
     ;Desenha os jogadores:-------------------------------------------------------
 ;________________________________________________________________________________
 
-    invoke printPlyr, player1, hdc, hMemDC 
-    invoke printPlyr, player2, hdc, hMemDC
+    invoke printPlyr, player1, hdc, hMemDC, TRUE
+    invoke printPlyr, player2, hdc, hMemDC, FALSE
 
     invoke printShots, hdc 
 
@@ -639,7 +717,9 @@ gameHandler proc p:dword
 
         .if isShooting.x
         	.if shotsDelays.x == SHOTS_DELAY
-            	invoke addShot, player1, addr fShot1, addr lShot1, addr numShots1 
+            	invoke addShot, player1, addr fShot1, addr lShot1,\
+                    addr numShots1 
+
             	mov shotsDelays.x, 0
             .else
             	inc shotsDelays.x
@@ -648,11 +728,22 @@ gameHandler proc p:dword
 
         .if isShooting.y
         	.if shotsDelays.y == SHOTS_DELAY
-				invoke addShot, player2, addr fShot2, addr lShot2, addr numShots2
+				invoke addShot, player2, addr fShot2, addr lShot2,\
+                    addr numShots2
+
 				mov shotsDelays.y, 0
             .else
             	inc shotsDelays.y
             .endif
+        .endif
+
+		invoke checkCrashs
+
+        .if hit
+            mov hit, FALSE
+            invoke clearAllShots
+
+            invoke resetAll
         .endif
 
         invoke InvalidateRect, hWnd, NULL, TRUE
@@ -788,7 +879,7 @@ addNode proc fNodePtrPtr:dword, lNodePtrPtr:dword, sizePtr:dword,
     ret
 addNode endp
 
-removeFNode proc fNodePtrPtr:dword, lNodePtrPtr:dword, sizePtr:dword
+removeFNode proc uses edx fNodePtrPtr:dword, lNodePtrPtr:dword, sizePtr:dword
     local nodeSize:byte ;Remove um nó do começo de uma lista:
     
     ;Move para al o tamanho da lista:
@@ -836,5 +927,46 @@ removeFNode proc fNodePtrPtr:dword, lNodePtrPtr:dword, sizePtr:dword
 
     ret
 removeFNode endp
+
+clearAllShots proc uses edx
+    ;Limpa os tiros do primeiro jogador
+    xor dl, dl
+    mov dh, numShots1
+    .while dl < dh
+        invoke removeFNode, addr fShot1, addr lShot1, addr numShots1
+
+        inc dl
+    .endw
+
+    ;Limpa os tiros do segundo jogador
+    xor dl, dl
+    mov dh, numShots2
+    .while dl < dh
+        invoke removeFNode, addr fShot2, addr lShot2, addr numShots2
+
+        inc dl
+    .endw
+
+    ret
+clearAllShots endp
+
+resetAll proc 
+	mov player1.direc, 7
+	mov player2.direc, 3
+
+	mov player1.playerObj.x, IMG_SIZE
+	mov player1.playerObj.y, WIN_HT / 2
+
+	mov player2.playerObj.x, WIN_WD - IMG_SIZE
+	mov player2.playerObj.y, WIN_HT / 2
+
+	mov player1.playerObj.speed.x, 0
+	mov player1.playerObj.speed.y, 0
+
+	mov player2.playerObj.speed.x, 0
+	mov player2.playerObj.speed.y, 0
+
+	ret
+resetAll endp
 
 end start

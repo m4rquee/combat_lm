@@ -48,8 +48,8 @@ node ends
 ; consts
 ;=================
 .const
-	WIN_HT equ 500 ;Altura da janela
-    WIN_WD equ 1000 ;Largura da janela
+	WIN_HT equ 800 ;Altura da janela
+    WIN_WD equ 1300 ;Largura da janela
 
     OFFSETX equ WIN_WD - HALF_SIZE
     OFFSETY equ WIN_HT - HALF_SIZE
@@ -60,13 +60,16 @@ node ends
 
     SHOT_RADIUS equ 3
 
+    D2_SHOT equ (HALF_SIZE + SHOT_RADIUS) * (HALF_SIZE + SHOT_RADIUS) ;Quadrado
+                                    ;da distância minima entre o tiro e o jogador 
+
     SCORE_SPACING equ 10 ;Espaço de separação dos digitos do jogo
 
     SPEED equ 4 ;Velocidade dos jogadores
     MAX_SCORE equ 5 ;Score máximo para o termino do jogo
     MAX_LIFE equ 100 ;Vida inicial dos jogadores
-    SHOTS_DELAY equ 3 ;Número de ciclos de espera para atirar
-    TRACKED_SHOTS equ 25 ;Número máximo de tiros na tela, 
+    SHOTS_DELAY equ 13 ;Número de ciclos de espera para atirar
+    TRACKED_SHOTS equ 255 ;Número máximo de tiros na tela, 
     					 ;antes deles desaparecerem (para cada jogador)
 
     NODE_SIZE equ SIZEOF node ;Tamanho em bytes da estrutura de nó
@@ -78,7 +81,7 @@ node ends
 AppName db "Combat", 0 ;Título da janela
 ClassName db "CombatClass", 0 ;Classe da janela
 
-;Bitmaps do jogo:
+;Bitmaps do jogador 1:
 h100 dd 0
 h101 dd 0
 h102 dd 0
@@ -87,6 +90,16 @@ h104 dd 0
 h105 dd 0
 h106 dd 0
 h107 dd 0
+
+;Bitmaps do jogador 2:
+h110 dd 0
+h111 dd 0
+h112 dd 0
+h113 dd 0
+h114 dd 0
+h115 dd 0
+h116 dd 0
+h117 dd 0
 
 .data?                
 hWnd HWND ?
@@ -107,7 +120,7 @@ updateScreen proto ;Desenha na tela todos os objetos
 printShots proto :HDC ;Desenha todos o tiros
 printScores proto :HDC ;Desenha os placares dos jogadores
 printShot proto :gameObj, :HDC ;Desenha o tiro passado
-printPlyr proto :player, :HDC, :HDC ;Desenha o jogador passado
+printPlyr proto :player, :HDC, :HDC, :BYTE ;Desenha o jogador passado
 
 movShots proto ;Move todos o tiros
 movObj proto :DWORD ;Atualiza a posição do gameObj passado
@@ -120,9 +133,10 @@ mult proto :WORD, :WORD ;Multiplica dois números (16 b) e coloca em eax
 
 incScore proto :DWORD ;Incrementa o score do jogador passado
 
-checkCrashs proto ;Incrementa o score e restabelece a posição dos
-                ;jogadores, quando um jogador acerta um tiro
-checkShot proto :gameObj, :gameObj ;Checa se um tiro atingiu um jogador 
+checkCrashs proto ;Incrementa o score quando um jogador acerta um tiro
+checkShot proto :gameObj, :gameObj ;Checa se um tiro atingiu um jogador
+
+resetAll proto ;Restabelece a posição dos jogadores para a inicial
 
 ;Métodos de lista ligada:
 
@@ -140,3 +154,5 @@ removeFNode proto :DWORD, :DWORD, :DWORD ;Remove um nó do começo de uma lista
                                         ;(ptr para um ptr do primeiro nó, ptr 
                                         ;para um ptr do último nó, ptr para o 
                                         ;tamanho da lista)
+
+clearAllShots proto ;Limpa as listas de tiros
