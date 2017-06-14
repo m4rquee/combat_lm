@@ -68,9 +68,11 @@ node ends
     SPEED equ 4 ;Velocidade dos jogadores
     MAX_SCORE equ 5 ;Score máximo para o termino do jogo
     MAX_LIFE equ 100 ;Vida inicial dos jogadores
-    SHOTS_DELAY equ 7 ;Número de ciclos de espera para atirar
+    SHOTS_DELAY equ 3 ;Número de ciclos de espera para atirar
     TRACKED_SHOTS equ 255 ;Número máximo de tiros na tela, 
     					 ;antes deles desaparecerem (para cada jogador)
+
+    SHOT_SPEED equ 3 ;Multiplicador de velocidade dos tiros 
 
     NODE_SIZE equ SIZEOF node ;Tamanho em bytes da estrutura de nó
 
@@ -81,13 +83,13 @@ node ends
 AppName db "Combat", 0 ;Título da janela
 ClassName db "CombatClass", 0 ;Classe da janela
 
-won1 db "O jogador 1 ganhou!!!", 0
+won1 db "O jogador 1 ganhou!!! Aperte (r) para reiniciar.", 0
 len_won1 equ $ - won1
 
-won2 db "O jogador 2 ganhou!!!", 0
+won2 db "O jogador 2 ganhou!!! Aperte (r) para reiniciar.", 0
 len_won2 equ $ - won2
 
-draw db "Ouve um empate!!!", 0
+draw db "Ouve um empate!!! Aperte (r) para reiniciar.", 0
 len_draw equ $ - draw
 
 ;Bitmaps do jogador 1:

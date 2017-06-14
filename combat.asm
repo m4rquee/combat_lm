@@ -44,6 +44,7 @@ invoke WinMain, hInstance, SW_SHOWDEFAULT
 invoke ExitProcess, eax
 
 loadBitmaps proc ;Carrega os bitmaps do jogo:
+    ;imagens do primeiro jogador:
     invoke LoadBitmap, hInstance, 100
     mov h100, eax
 
@@ -68,6 +69,7 @@ loadBitmaps proc ;Carrega os bitmaps do jogo:
     invoke LoadBitmap, hInstance, 107
     mov h107, eax	
 
+    ;imagens do segundo jogador:
     invoke LoadBitmap, hInstance, 110
     mov h110, eax
 
@@ -178,24 +180,40 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM ;wParam -
 ;________________________________________________________________________________
 
         ;Teclas de movimento player1:
-        .if (wParam == 77h) ;w
+        .if (wParam == 77h || wParam == 57h) ;w
             mov player1.playerObj.speed.y, -SPEED 
-        .elseif (wParam == 61h) ;a
+        .elseif (wParam == 61h || wParam == 41h) ;a
             mov player1.playerObj.speed.x, -SPEED
-        .elseif (wParam == 73h) ;s
+        .elseif (wParam == 73h || wParam == 53h) ;s
             mov player1.playerObj.speed.y, SPEED
-        .elseif (wParam == 64h) ;d
+        .elseif (wParam == 64h || wParam == 44h) ;d
             mov player1.playerObj.speed.x, SPEED
 ;________________________________________________________________________________
 
-        .elseif (wParam == 79h) ;y - Tiro player1:
+        .elseif (wParam == 79h || wParam == 59h) ;y - Tiro player1:
             mov isShooting.x, TRUE
-        .elseif (wParam == 75h) ;u - Especial player1:
+        .elseif (wParam == 75h || wParam == 55h) ;u - Especial player1:
 ;________________________________________________________________________________
 
         .elseif (wParam == 32h) ;2 - Tiro player2:
             mov isShooting.y, TRUE      
         .elseif (wParam == 33h) ;3 - Especial player2:
+        .elseif (wParam == 72h) ;r - Reinicia o jogo
+            .if over
+                mov over, FALSE 
+
+                ;Zera os scores:
+				mov scoreP1.x, 48 + 0
+                mov scoreP1.y, 48 + 0
+
+                mov scoreP2.x, 48 + 0
+                mov scoreP2.y, 48 + 0
+
+                mov eax, offset gameHandler 
+                invoke CreateThread, NULL, NULL, eax, 0, 0, addr threadID 
+
+                invoke CloseHandle, eax
+            .endif
         .endif
 ;________________________________________________________________________________
         
@@ -218,19 +236,19 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM ;wParam -
 ;________________________________________________________________________________
 
         ;Teclas de movimento player1:
-        .if (wParam == 57h) ;w
+        .if (wParam == 77h || wParam == 57h) ;w
             .if (player1.playerObj.speed.y > 7fh) ;Caso seja negativo:
                 mov player1.playerObj.speed.y, 0 
             .endif
-        .elseif (wParam == 41h) ;a
+        .elseif (wParam == 61h || wParam == 41h) ;a
             .if (player1.playerObj.speed.x > 7fh) ;Caso seja negativo:
                 mov player1.playerObj.speed.x, 0 
             .endif
-        .elseif (wParam == 53h) ;s
+        .elseif (wParam == 73h || wParam == 53h) ;s
             .if (player1.playerObj.speed.y < 80h) ;Caso seja positivo:
                 mov player1.playerObj.speed.y, 0 
             .endif
-        .elseif (wParam == 44h) ;d
+        .elseif (wParam == 64h || wParam == 44h) ;d
             .if (player1.playerObj.speed.x < 80h) ;Caso seja positivo:
                 mov player1.playerObj.speed.x, 0 
             .endif
@@ -288,6 +306,8 @@ mult proc uses ebx edx n1:word, n2:word ;Multiplica dois números (16 b) e coloc
     mov bx, n2
 
     imul bx
+
+    ;Move as duas partes para eax:
     shl edx, 16
 
     add eax, edx
@@ -508,6 +528,7 @@ checkShot endp
 printPlyr proc plyr:player, _hdc:HDC, _hMemDC:HDC, whichImg:byte ;Desenha na tela um jogador:
     ;Seleciona qual imagem vai ser desenhada:
 ;________________________________________________________________________________
+    ;Se for o primeiro jogador:
 	.if whichImg
 	    .if plyr.direc == 0
 	        invoke SelectObject, _hMemDC, h100
@@ -527,6 +548,7 @@ printPlyr proc plyr:player, _hdc:HDC, _hMemDC:HDC, whichImg:byte ;Desenha na tel
 	        invoke SelectObject, _hMemDC, h107
 	    .endif
 	.else
+    ;Se for o segundo jogador:
 		.if plyr.direc == 0
 	        invoke SelectObject, _hMemDC, h110
 	    .elseif plyr.direc == 1
@@ -619,6 +641,9 @@ printShot proc uses eax edx shot:gameObj, _hdc:HDC ;Desenha na tela um tiro:
     local upperLX:dword
     local upperLY:dword
 
+    ;Calcula as coordenadas do ponto superior esquerdo:
+;________________________________________________________________________________
+
     movzx eax, shot.x
     movzx ebx, shot.y
     sub eax, SHOT_RADIUS
@@ -626,6 +651,7 @@ printShot proc uses eax edx shot:gameObj, _hdc:HDC ;Desenha na tela um tiro:
 
     mov upperLX, eax  
     mov upperLY, ebx
+;________________________________________________________________________________
 
     movzx eax, shot.x
     movzx ebx, shot.y
@@ -639,16 +665,18 @@ printShot proc uses eax edx shot:gameObj, _hdc:HDC ;Desenha na tela um tiro:
 printShot endp
     
 printScores proc _hdc:HDC
+    ;Score do jogador 1:
     invoke SetTextAlign, _hdc, TA_LEFT
     invoke TextOut, _hdc, SCORE_SPACING, SCORE_SPACING, addr scoreP1, 2
 
+    ;Score do jogador 2:
     invoke SetTextAlign, _hdc, TA_RIGHT
     invoke TextOut, _hdc, WIN_WD - SCORE_SPACING, SCORE_SPACING, addr scoreP2, 2
 
     ret
 printScores endp
 
-incScore proc addrScore:dword
+incScore proc addrScore:dword ;Soma um no score passado:
     assume eax:ptr pair
     mov eax, addrScore
 
@@ -692,14 +720,14 @@ updateScreen proc ;Desenha na tela todos os objetos:
 
         ;Desenha os scores:
         invoke printScores, hdc
-    .else
+    .else ;Caso o jogo tenha acabado:
         invoke SetTextAlign, hdc, TA_CENTER
 
-        .if over == 3
+        .if over == 3 ;Caso seja empate:
             invoke TextOut, hdc, WIN_WD / 2, WIN_HT / 2, addr draw, len_draw
-        .elseif over == 1
+        .elseif over == 1 ;Caso o primeiro tenha ganho:
             invoke TextOut, hdc, WIN_WD / 2, WIN_HT / 2, addr won1, len_won1
-        .elseif over == 2
+        .elseif over == 2 ;Caso o segundo tenha ganho:
             invoke TextOut, hdc, WIN_WD / 2, WIN_HT / 2, addr won2, len_won2
         .endif
     .endif
@@ -714,9 +742,13 @@ gameHandler proc p:dword
     .while !over
         invoke  Sleep, 60
 
-        invoke movShots
+        invoke movShots ;Move todos os tiros na tela
 
-        invoke canMov, player1.playerObj, player2.playerObj
+        invoke canMov, player1.playerObj, player2.playerObj ;Verifica se no futuro
+                                                            ;os jogadores vão colidir
+
+        ;Caso o jogador não for colidir ele é movido:
+;________________________________________________________________________________
 
         .if canPlyrsMov.x 
             invoke movObj, addr player1.playerObj
@@ -725,11 +757,14 @@ gameHandler proc p:dword
         .if canPlyrsMov.y
             invoke movObj, addr player2.playerObj
         .endif
+;________________________________________________________________________________
 
+        ;Atualiza a direção dos jogadores baseado nas suas velocidades nos eixos:
         invoke updateDirec, addr player1
         invoke updateDirec, addr player2
 
         .if isShooting.x
+            ;Adiciona um tiro se o tempo de delay tiver sido atingido:
         	.if shotsDelays.x == SHOTS_DELAY
             	invoke addShot, player1, addr fShot1, addr lShot1,\
                     addr numShots1 
@@ -741,6 +776,7 @@ gameHandler proc p:dword
         .endif
 
         .if isShooting.y
+            ;Adiciona um tiro se o tempo de delay tiver sido atingido:
         	.if shotsDelays.y == SHOTS_DELAY
 				invoke addShot, player2, addr fShot2, addr lShot2,\
                     addr numShots2
@@ -751,14 +787,17 @@ gameHandler proc p:dword
             .endif
         .endif
 
-		invoke checkCrashs
+		invoke checkCrashs ;Verifica se os jogadores foram atingidos por algum tiro
 
-        .if hit
+        .if hit ;Caso atingido os jogadores voltam para a posição inicial:
             mov hit, FALSE
             invoke clearAllShots
 
             invoke resetAll
         .endif
+
+        ;Checa se o jogo acabou:
+;________________________________________________________________________________
 
         mov dl, maxScore.x
         mov dh, maxScore.y
@@ -771,6 +810,8 @@ gameHandler proc p:dword
             invoke clearAllShots
             or over, 2
         .endif
+;________________________________________________________________________________
+
 
         invoke InvalidateRect, hWnd, NULL, TRUE
     .endw
@@ -778,7 +819,8 @@ gameHandler proc p:dword
     ret
 gameHandler endp
 
-updateDirec proc addrPlyr:dword
+updateDirec proc addrPlyr:dword ;Atualiza a direção dos jogadores baseado nas suas
+                                ;velocidades nos eixos:
     assume eax:ptr player
     mov eax, addrPlyr
 
@@ -817,44 +859,50 @@ updateDirec proc addrPlyr:dword
 updateDirec endp
 
 addShot proc plyr:player, fNodePtrPtr:dword, lNodePtrPtr:dword, sizePtr:dword 
-    ;Adiciona um tiro em uma lista:
+                                                ;Adiciona um tiro em uma lista:
     local newShot: gameObj
 
     mov eax, sizePtr
     mov al, [eax]
 
-    .if al == TRACKED_SHOTS
+    .if al == TRACKED_SHOTS ;Checa se a lista esta cheia, caso verdadeiro o primeiro tiro
+                            ;da lista é removido:
         invoke removeFNode, fNodePtrPtr, lNodePtrPtr, sizePtr
     .endif 
     
+    ;Cria um novo tiro na posição do jogador:
     mov ax, plyr.playerObj.x
     mov newShot.x, ax
     mov ax, plyr.playerObj.y
     mov newShot.y, ax
 
+    ;Desloca o tiro para a frente do cano do tanque:
+;________________________________________________________________________________
+
     mov al, plyr.direc
 
     .if al == 0 || al == 1 || al == 2
-        mov newShot.speed.y, 3 * -SPEED
+        mov newShot.speed.y, SHOT_SPEED * -SPEED
         sub newShot.y, HALF_SIZE
     .elseif al == 6 || al == 5 || al == 4
-        mov newShot.speed.y, 3 * SPEED
+        mov newShot.speed.y, SHOT_SPEED * SPEED
         add newShot.y, HALF_SIZE
     .else ;Caso seja 3 ou 7
         mov newShot.speed.y, 0
     .endif 
 
     .if al == 0 || al == 7 || al == 6
-        mov newShot.speed.x, 3 * -SPEED
+        mov newShot.speed.x, SHOT_SPEED * -SPEED
         sub newShot.x, HALF_SIZE
     .elseif al == 2 || al == 3 || al == 4
-        mov newShot.speed.x, 3 * SPEED
+        mov newShot.speed.x, SHOT_SPEED * SPEED
         add newShot.x, HALF_SIZE
     .else ;Caso seja 1 ou 5
         mov newShot.speed.x, 0
     .endif 
+;________________________________________________________________________________
 
-    invoke addNode, fNodePtrPtr, lNodePtrPtr, sizePtr, newShot
+    invoke addNode, fNodePtrPtr, lNodePtrPtr, sizePtr, newShot ;Adiciona o tiro na lista
 
     ret
 addShot endp
@@ -864,9 +912,9 @@ addNode proc fNodePtrPtr:dword, lNodePtrPtr:dword, sizePtr:dword,
 
     assume eax:ptr node
 
-    invoke GlobalAlloc, GMEM_FIXED, NODE_SIZE ;Aloca memória para o novo nó
+    i
+    ;Copia os dados na nova estrutura alocada:-----------------------------------nvoke GlobalAlloc, GMEM_FIXED, NODE_SIZE ;Aloca memória para o novo nó
 
-    ;Copia os dados na nova estrutura alocada:-----------------------------------
 ;________________________________________________________________________________
 
     mov bx, newValue.x
@@ -954,7 +1002,7 @@ removeFNode proc uses edx fNodePtrPtr:dword, lNodePtrPtr:dword, sizePtr:dword
     ret
 removeFNode endp
 
-clearAllShots proc uses edx
+clearAllShots proc uses edx ;Limpa todas as listas de tiros:
     ;Limpa os tiros do primeiro jogador
     xor dl, dl
     mov dh, numShots1
@@ -976,21 +1024,32 @@ clearAllShots proc uses edx
     ret
 clearAllShots endp
 
-resetAll proc 
+resetAll proc ;Reseta a posição dos jogadores, limpa as listas de tiros e zera a 
+            ;velocidade dos jogadores:
+
+    ;Reseta a direção dos jogadores:
 	mov player1.direc, 7
 	mov player2.direc, 3
+
+    ;Reseta a posição dos jogadores:
+;________________________________________________________________________________
 
 	mov player1.playerObj.x, IMG_SIZE
 	mov player1.playerObj.y, WIN_HT / 2
 
 	mov player2.playerObj.x, WIN_WD - IMG_SIZE
 	mov player2.playerObj.y, WIN_HT / 2
+;________________________________________________________________________________
+
+    ;Zera a velocidade dos jogadores:
+;________________________________________________________________________________
 
 	mov player1.playerObj.speed.x, 0
 	mov player1.playerObj.speed.y, 0
 
 	mov player2.playerObj.speed.x, 0
 	mov player2.playerObj.speed.y, 0
+;________________________________________________________________________________
 
 	ret
 resetAll endp
