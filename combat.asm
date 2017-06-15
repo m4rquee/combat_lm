@@ -912,9 +912,9 @@ addNode proc fNodePtrPtr:dword, lNodePtrPtr:dword, sizePtr:dword,
 
     assume eax:ptr node
 
-    i
-    ;Copia os dados na nova estrutura alocada:-----------------------------------nvoke GlobalAlloc, GMEM_FIXED, NODE_SIZE ;Aloca memória para o novo nó
+    invoke GlobalAlloc, GMEM_FIXED, NODE_SIZE ;Aloca memória para o novo nó
 
+    ;Copia os dados na nova estrutura alocada:-----------------------------------
 ;________________________________________________________________________________
 
     mov bx, newValue.x
